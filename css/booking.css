@@ -1,0 +1,616 @@
+/* ===== 고객 예약 페이지 스타일 ===== */
+
+.booking-page {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    min-height: 100vh;
+}
+
+.booking-app {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== 헤더 ===== */
+.booking-header {
+    text-align: center;
+    padding: 30px 0;
+}
+
+.booking-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.booking-logo .logo {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+}
+
+.logo-text h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 2px;
+}
+
+.logo-text p {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+/* ===== 스텝 인디케이터 ===== */
+.step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0 30px;
+    gap: 8px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.step-label {
+    font-size: 11px;
+    color: var(--gray-400);
+    white-space: nowrap;
+}
+
+.step.active .step-number {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(91, 108, 255, 0.4);
+}
+
+.step.active .step-label {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.step.completed .step-number {
+    background: var(--success);
+    color: white;
+}
+
+.step.completed .step-label {
+    color: var(--success);
+}
+
+.step-line {
+    width: 30px;
+    height: 2px;
+    background: var(--gray-200);
+    margin-bottom: 20px;
+}
+
+/* ===== 메인 컨텐츠 ===== */
+.booking-main {
+    flex: 1;
+}
+
+.booking-step {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-content h2 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+.step-desc {
+    text-align: center;
+    font-size: 14px;
+    color: var(--gray-500);
+    margin-bottom: 24px;
+}
+
+.step-desc strong {
+    color: var(--primary);
+}
+
+/* ===== 캘린더 카드 ===== */
+.booking-calendar-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+}
+
+.booking-calendar-card .calendar-nav {
+    margin-bottom: 20px;
+}
+
+.date-display {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.booking-calendar-card .calendar-legend {
+    border-top: none;
+    padding-top: 12px;
+    gap: 20px;
+}
+
+/* ===== 시간 슬롯 ===== */
+.time-slots-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 16px;
+}
+
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.time-slot {
+    padding: 16px 12px;
+    text-align: center;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--white);
+}
+
+.time-slot:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.time-slot.selected {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+}
+
+.time-value {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.time-slot.selected .time-value {
+    color: white;
+}
+
+.time-duration {
+    display: block;
+    font-size: 12px;
+    color: var(--gray-400);
+}
+
+.time-slot.selected .time-duration {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.back-step-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: var(--gray-500);
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.back-step-btn:hover {
+    color: var(--gray-700);
+}
+
+/* ===== 예약 폼 ===== */
+.booking-form-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+}
+
+.form-section {
+    margin-bottom: 28px;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+}
+
+.form-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+/* 과정 선택 */
+.course-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.course-option {
+    cursor: pointer;
+}
+
+.course-option input {
+    display: none;
+}
+
+.course-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s;
+}
+
+.course-option input:checked + .course-card {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.course-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.course-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.course-desc {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.course-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* 폼 그룹 */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+}
+
+.required {
+    color: var(--danger);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* 결제 정보 */
+.payment-info {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 16px;
+}
+
+.payment-info p {
+    font-size: 14px;
+    color: var(--gray-600);
+    margin-bottom: 12px;
+}
+
+.account-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+}
+
+.account-info .bank {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    padding: 4px 8px;
+    background: var(--gray-100);
+    border-radius: 4px;
+}
+
+.account-info .account-number {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+    letter-spacing: 0.5px;
+}
+
+.account-info .account-holder {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+.payment-info .notice {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-bottom: 0;
+}
+
+/* 폼 액션 */
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.submit-btn:hover {
+    background: var(--primary-dark);
+    box-shadow: var(--shadow-md);
+}
+
+/* ===== 완료 화면 ===== */
+.completion-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 32px 24px;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.completion-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--success);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 20px;
+}
+
+.completion-card h2 {
+    margin-bottom: 8px;
+}
+
+.completion-desc {
+    color: var(--gray-500);
+    margin-bottom: 24px;
+}
+
+.booking-summary {
+    text-align: left;
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.booking-summary h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 14px;
+}
+
+.summary-label {
+    color: var(--gray-500);
+}
+
+.summary-value {
+    font-weight: 500;
+    color: var(--gray-800);
+}
+
+.summary-item.highlight {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.summary-item.highlight .summary-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.payment-reminder {
+    background: var(--primary-light);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.payment-reminder h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 12px;
+}
+
+.payment-reminder .account-info.large {
+    background: var(--white);
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.payment-reminder .account-info.large .account-number {
+    font-size: 18px;
+}
+
+.payment-reminder p {
+    font-size: 13px;
+    color: var(--primary-dark);
+    margin: 0;
+}
+
+.new-booking-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.new-booking-btn:hover {
+    background: var(--gray-200);
+}
+
+/* ===== 푸터 ===== */
+.booking-footer {
+    text-align: center;
+    padding: 30px 0;
+    margin-top: auto;
+}
+
+.booking-footer p {
+    font-size: 13px;
+    color: var(--gray-400);
+    margin-bottom: 4px;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 480px) {
+    .booking-app {
+        padding: 16px;
+    }
+
+    .step-indicator {
+        gap: 4px;
+    }
+
+    .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .step-label {
+        font-size: 10px;
+    }
+
+    .step-line {
+        width: 20px;
+    }
+
+    .time-slots {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .account-info {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .account-info .account-number {
+        width: 100%;
+        order: 3;
+    }
+}

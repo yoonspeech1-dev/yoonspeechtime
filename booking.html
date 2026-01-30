@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>윤스피치 - 1:1 컨설팅 예약</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/booking.css">
+</head>
+<body class="booking-page">
+    <div class="booking-app">
+        <!-- 헤더 -->
+        <header class="booking-header">
+            <div class="booking-logo">
+                <span class="logo">Y</span>
+                <div class="logo-text">
+                    <h1>윤스피치</h1>
+                    <p>1:1 면접 컨설팅</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="booking-main">
+            <!-- 스텝 인디케이터 -->
+            <div class="step-indicator">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">날짜 선택</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">시간 선택</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">정보 입력</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" data-step="4">
+                    <span class="step-number">4</span>
+                    <span class="step-label">예약 완료</span>
+                </div>
+            </div>
+
+            <!-- Step 1: 날짜 선택 -->
+            <section class="booking-step" id="step1">
+                <div class="step-content">
+                    <h2>예약 날짜를 선택해주세요</h2>
+                    <p class="step-desc">예약 가능한 날짜가 표시됩니다</p>
+
+                    <div class="booking-calendar-card">
+                        <div class="calendar-nav">
+                            <button class="nav-btn" id="prevMonth">‹</button>
+                            <div class="date-display" id="currentMonth">2024년 1월</div>
+                            <button class="nav-btn" id="nextMonth">›</button>
+                        </div>
+
+                        <div class="calendar-grid">
+                            <div class="weekday-header">
+                                <span class="sunday">일</span>
+                                <span>월</span>
+                                <span>화</span>
+                                <span>수</span>
+                                <span>목</span>
+                                <span>금</span>
+                                <span class="saturday">토</span>
+                            </div>
+                            <div class="calendar-days" id="calendarDays"></div>
+                        </div>
+
+                        <div class="calendar-legend">
+                            <div class="calendar-legend-item">
+                                <span class="legend-dot available"></span>
+                                <span>예약 가능</span>
+                            </div>
+                            <div class="calendar-legend-item">
+                                <span class="legend-dot unavailable"></span>
+                                <span>예약 마감</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2: 시간 선택 -->
+            <section class="booking-step" id="step2" style="display: none;">
+                <div class="step-content">
+                    <h2>예약 시간을 선택해주세요</h2>
+                    <p class="step-desc">선택한 날짜: <strong id="selectedDateDisplay">-</strong></p>
+
+                    <div class="time-slots-card">
+                        <div class="time-slots" id="timeSlots">
+                            <p class="empty-state">시간을 불러오는 중...</p>
+                        </div>
+                    </div>
+
+                    <button class="back-step-btn" id="backToStep1">← 날짜 다시 선택</button>
+                </div>
+            </section>
+
+            <!-- Step 3: 정보 입력 -->
+            <section class="booking-step" id="step3" style="display: none;">
+                <div class="step-content">
+                    <h2>예약 정보를 입력해주세요</h2>
+                    <p class="step-desc">
+                        <strong id="bookingDateTimeDisplay">-</strong>
+                    </p>
+
+                    <div class="booking-form-card">
+                        <form id="bookingForm">
+                            <div class="form-section">
+                                <h3>상담 과정 선택</h3>
+                                <div class="course-options" id="courseOptions">
+                                    <label class="course-option">
+                                        <input type="radio" name="course" value="basic" checked>
+                                        <div class="course-card">
+                                            <div class="course-info">
+                                                <span class="course-name">기본 컨설팅</span>
+                                                <span class="course-desc">1:1 면접 기초 피드백</span>
+                                            </div>
+                                            <span class="course-price">150,000원</span>
+                                        </div>
+                                    </label>
+                                    <label class="course-option">
+                                        <input type="radio" name="course" value="standard">
+                                        <div class="course-card">
+                                            <div class="course-info">
+                                                <span class="course-name">스탠다드 컨설팅</span>
+                                                <span class="course-desc">심층 피드백 + 모의 면접</span>
+                                            </div>
+                                            <span class="course-price">250,000원</span>
+                                        </div>
+                                    </label>
+                                    <label class="course-option">
+                                        <input type="radio" name="course" value="premium">
+                                        <div class="course-card">
+                                            <div class="course-info">
+                                                <span class="course-name">프리미엄 컨설팅</span>
+                                                <span class="course-desc">전체 과정 + 무제한 피드백</span>
+                                            </div>
+                                            <span class="course-price">400,000원</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3>예약자 정보</h3>
+                                <div class="form-group">
+                                    <label for="customerName">이름 <span class="required">*</span></label>
+                                    <input type="text" id="customerName" name="customerName" required placeholder="홍길동">
+                                </div>
+                                <div class="form-group">
+                                    <label for="customerPhone">연락처 <span class="required">*</span></label>
+                                    <input type="tel" id="customerPhone" name="customerPhone" required placeholder="010-1234-5678">
+                                </div>
+                                <div class="form-group">
+                                    <label for="customerEmail">이메일</label>
+                                    <input type="email" id="customerEmail" name="customerEmail" placeholder="example@email.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="customerMemo">요청사항</label>
+                                    <textarea id="customerMemo" name="customerMemo" rows="3" placeholder="상담 전 전달하고 싶은 내용을 작성해주세요"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3>결제 안내</h3>
+                                <div class="payment-info">
+                                    <p>예약 신청 후 <strong>24시간 이내</strong>에 아래 계좌로 입금해주세요.</p>
+                                    <div class="account-info">
+                                        <span class="bank">카카오뱅크</span>
+                                        <span class="account-number">3333-12-3456789</span>
+                                        <span class="account-holder">윤소윤</span>
+                                    </div>
+                                    <p class="notice">입금 확인 후 예약이 확정됩니다.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="back-step-btn" id="backToStep2">← 시간 다시 선택</button>
+                                <button type="submit" class="submit-btn">예약 신청하기</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 4: 예약 완료 -->
+            <section class="booking-step" id="step4" style="display: none;">
+                <div class="step-content">
+                    <div class="completion-card">
+                        <div class="completion-icon">✓</div>
+                        <h2>예약 신청이 완료되었습니다!</h2>
+                        <p class="completion-desc">입금 확인 후 예약이 확정됩니다.</p>
+
+                        <div class="booking-summary">
+                            <h3>예약 정보</h3>
+                            <div class="summary-item">
+                                <span class="summary-label">예약 번호</span>
+                                <span class="summary-value" id="summaryId">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">예약 일시</span>
+                                <span class="summary-value" id="summaryDateTime">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">상담 과정</span>
+                                <span class="summary-value" id="summaryCourse">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">예약자</span>
+                                <span class="summary-value" id="summaryName">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">연락처</span>
+                                <span class="summary-value" id="summaryPhone">-</span>
+                            </div>
+                            <div class="summary-item highlight">
+                                <span class="summary-label">결제 금액</span>
+                                <span class="summary-value" id="summaryPrice">-</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-reminder">
+                            <h4>입금 계좌</h4>
+                            <div class="account-info large">
+                                <span class="bank">카카오뱅크</span>
+                                <span class="account-number">3333-12-3456789</span>
+                                <span class="account-holder">윤소윤</span>
+                            </div>
+                            <p>24시간 이내 입금을 완료해주세요.</p>
+                        </div>
+
+                        <button class="new-booking-btn" onclick="location.reload()">새 예약하기</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="booking-footer">
+            <p>© 2024 윤스피치. All rights reserved.</p>
+            <p>문의: contact@yoonspeech.com</p>
+        </footer>
+    </div>
+
+    <!-- 토스트 컨테이너 -->
+    <div id="toastContainer"></div>
+
+    <script src="js/booking.js"></script>
+</body>
+</html>
