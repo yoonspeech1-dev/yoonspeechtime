@@ -993,6 +993,31 @@ body {
     background: var(--primary-dark);
 }
 
+.email-btn {
+    padding: 8px 20px;
+    background: #16a34a;
+    border: none;
+    border-radius: var(--radius);
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.email-btn:hover {
+    background: #15803d;
+}
+
+.email-btn.email-sent {
+    background: #9ca3af;
+    cursor: default;
+}
+
+.email-btn.email-failed {
+    background: #dc2626;
+}
+
 /* ===== Link Settings ===== */
 .link-card .description {
     font-size: 14px;
@@ -1432,6 +1457,32 @@ body {
 
 .detail-footer-buttons .detail-confirm-btn {
     flex: 1;
+}
+
+.detail-email-btn {
+    flex: 1;
+    padding: 14px;
+    background: #16a34a;
+    border: none;
+    border-radius: var(--radius);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.detail-email-btn:hover {
+    background: #15803d;
+}
+
+.detail-email-btn.email-sent {
+    background: #9ca3af;
+    cursor: default;
+}
+
+.detail-email-btn.email-failed {
+    background: #dc2626;
 }
 
 /* ===== Edit Schedule Modal ===== */

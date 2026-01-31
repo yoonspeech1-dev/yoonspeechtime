@@ -728,11 +728,13 @@ function setupTabs() {
 function setupEventListeners() {
     // 이전/다음 달
     document.getElementById('prevMonth').addEventListener('click', () => {
+        state.currentDate.setDate(1);
         state.currentDate.setMonth(state.currentDate.getMonth() - 1);
         renderCalendar();
     });
 
     document.getElementById('nextMonth').addEventListener('click', () => {
+        state.currentDate.setDate(1);
         state.currentDate.setMonth(state.currentDate.getMonth() + 1);
         renderCalendar();
     });
@@ -911,11 +913,12 @@ function renderReservations(filter = 'all', searchTerm = '') {
                 <div class="reservation-schedules">
                     ${schedules.map((s, i) => `<span class="schedule-chip">${i + 1}회 ${formatDateShort(s.date)} ${s.time}</span>`).join('')}
                 </div>
-                ${reservation.status === 'pending' ? `
-                    <div class="reservation-actions">
+                <div class="reservation-actions">
+                    ${reservation.status === 'pending' ? `
                         <button class="confirm-btn" onclick="event.stopPropagation(); confirmReservation('${reservation.id}')">예약 확정</button>
-                    </div>
-                ` : ''}
+                    ` : ''}
+                    <button class="email-btn" onclick="event.stopPropagation(); sendConfirmationEmail('${reservation.id}')">메일발송</button>
+                </div>
             </div>
         `;
     }).join('');
@@ -999,7 +1002,59 @@ async function sendConfirmationSMS(reservation) {
     }
 }
 
+async function sendConfirmationEmail(reservationId) {
+    const reservation = state.reservations.find(r => r.id === reservationId);
+    if (!reservation) return;
+
+    if (!reservation.customerEmail) {
+        showToast('고객 이메일이 등록되어 있지 않습니다');
+        return;
+    }
+
+    // 발송 중 상태로 버튼 변경
+    const btns = document.querySelectorAll(`.email-btn[onclick*="'${reservationId}'"], #detailEmailBtn`);
+    btns.forEach(btn => {
+        btn.textContent = '발송중...';
+        btn.disabled = true;
+    });
+
+    try {
+        const res = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reservation }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showToast('안내 이메일이 발송되었습니다');
+            btns.forEach(btn => {
+                btn.textContent = '발송 완료';
+                btn.classList.add('email-sent');
+                btn.classList.remove('email-failed');
+            });
+        } else {
+            showToast('이메일 발송에 실패했습니다');
+            btns.forEach(btn => {
+                btn.textContent = '발송 실패';
+                btn.classList.add('email-failed');
+                btn.classList.remove('email-sent');
+                btn.disabled = false;
+            });
+        }
+    } catch (e) {
+        console.error('이메일 발송 요청 실패:', e);
+        showToast('이메일 발송에 실패했습니다');
+        btns.forEach(btn => {
+            btn.textContent = '발송 실패';
+            btn.classList.add('email-failed');
+            btn.classList.remove('email-sent');
+            btn.disabled = false;
+        });
+    }
+}
+
 window.confirmReservation = confirmReservation;
+window.sendConfirmationEmail = sendConfirmationEmail;
 
 // ===== 예약 상세보기 =====
 function showReservationDetail(reservationId) {
@@ -1083,6 +1138,7 @@ function showReservationDetail(reservationId) {
             <div class="detail-footer-buttons">
                 <button class="detail-edit-btn" id="detailEditBtn">일정 수정</button>
                 <button class="detail-confirm-btn" id="detailConfirmBtn">예약 확정</button>
+                <button class="detail-email-btn" id="detailEmailBtn">메일발송</button>
                 <button class="detail-delete-btn" id="detailDeleteBtn">예약 삭제</button>
             </div>`;
         document.getElementById('detailConfirmBtn').addEventListener('click', () => {
@@ -1093,9 +1149,15 @@ function showReservationDetail(reservationId) {
         footer.innerHTML = `
             <div class="detail-footer-buttons">
                 <button class="detail-edit-btn" id="detailEditBtn">일정 수정</button>
+                <button class="detail-email-btn" id="detailEmailBtn">메일발송</button>
                 <button class="detail-delete-btn" id="detailDeleteBtn">예약 삭제</button>
             </div>`;
     }
+
+    // 메일발송 버튼 이벤트
+    document.getElementById('detailEmailBtn').addEventListener('click', () => {
+        sendConfirmationEmail(reservation.id);
+    });
 
     // 일정 수정 버튼 이벤트
     document.getElementById('detailEditBtn').addEventListener('click', () => {
