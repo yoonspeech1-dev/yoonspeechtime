@@ -26,30 +26,93 @@
             <div class="step-indicator">
                 <div class="step active" data-step="1">
                     <span class="step-number">1</span>
-                    <span class="step-label">날짜 선택</span>
+                    <span class="step-label">과정 선택</span>
                 </div>
                 <div class="step-line"></div>
                 <div class="step" data-step="2">
                     <span class="step-number">2</span>
-                    <span class="step-label">시간 선택</span>
+                    <span class="step-label">일정 선택</span>
                 </div>
                 <div class="step-line"></div>
                 <div class="step" data-step="3">
                     <span class="step-number">3</span>
-                    <span class="step-label">정보 입력</span>
+                    <span class="step-label">신청서 작성</span>
                 </div>
                 <div class="step-line"></div>
                 <div class="step" data-step="4">
                     <span class="step-number">4</span>
-                    <span class="step-label">예약 완료</span>
+                    <span class="step-label">입금 안내</span>
                 </div>
             </div>
 
-            <!-- Step 1: 날짜 선택 -->
+            <!-- Step 1: 과정 선택 -->
             <section class="booking-step" id="step1">
                 <div class="step-content">
-                    <h2>예약 날짜를 선택해주세요</h2>
-                    <p class="step-desc">예약 가능한 날짜가 표시됩니다</p>
+                    <h2>컨설팅 과정을 선택해주세요</h2>
+                    <p class="step-desc">원하시는 컨설팅 과정을 선택하세요</p>
+
+                    <div class="course-select-card">
+                        <div class="course-options" id="courseOptions">
+                            <label class="course-option">
+                                <input type="radio" name="course" value="allcare">
+                                <div class="course-card">
+                                    <span class="course-name">올케어</span>
+                                    <span class="course-sessions">3회</span>
+                                </div>
+                            </label>
+                            <label class="course-option">
+                                <input type="radio" name="course" value="perfect">
+                                <div class="course-card">
+                                    <span class="course-name">퍼펙트</span>
+                                    <span class="course-sessions">5회</span>
+                                </div>
+                            </label>
+                            <label class="course-option">
+                                <input type="radio" name="course" value="finish">
+                                <div class="course-card">
+                                    <span class="course-name">피니쉬</span>
+                                    <span class="course-sessions">8회</span>
+                                </div>
+                            </label>
+                            <label class="course-option">
+                                <input type="radio" name="course" value="custom">
+                                <div class="course-card">
+                                    <span class="course-name">직접입력</span>
+                                    <span class="course-sessions">횟수 선택</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- 직접입력 횟수 -->
+                        <div class="custom-input-section" id="customInputSection" style="display: none;">
+                            <label for="customSessions">희망 컨설팅 횟수</label>
+                            <div class="custom-input-row">
+                                <button class="qty-btn" id="qtyMinus">−</button>
+                                <input type="number" id="customSessions" value="1" min="1" max="20">
+                                <button class="qty-btn" id="qtyPlus">+</button>
+                                <span class="qty-unit">회</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="next-btn" id="toStep2Btn" disabled>다음 단계로</button>
+                </div>
+            </section>
+
+            <!-- Step 2: 일정 선택 -->
+            <section class="booking-step" id="step2" style="display: none;">
+                <div class="step-content">
+                    <h2>컨설팅 일정을 선택해주세요</h2>
+                    <p class="step-desc">
+                        총 <strong id="totalSessionsDisplay">0</strong>회 선택 필요
+                        <span class="selection-counter">(<span id="selectedCount">0</span> / <span id="totalCount">0</span>)</span>
+                    </p>
+
+                    <!-- 선택한 일정 표시 -->
+                    <div class="selected-schedules" id="selectedSchedules" style="display: none;">
+                        <h3>선택한 일정</h3>
+                        <div class="schedule-tags" id="scheduleTags"></div>
+                    </div>
 
                     <div class="booking-calendar-card">
                         <div class="calendar-nav">
@@ -78,110 +141,278 @@
                             </div>
                             <div class="calendar-legend-item">
                                 <span class="legend-dot unavailable"></span>
-                                <span>예약 마감</span>
+                                <span>마감</span>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <!-- Step 2: 시간 선택 -->
-            <section class="booking-step" id="step2" style="display: none;">
-                <div class="step-content">
-                    <h2>예약 시간을 선택해주세요</h2>
-                    <p class="step-desc">선택한 날짜: <strong id="selectedDateDisplay">-</strong></p>
-
-                    <div class="time-slots-card">
-                        <div class="time-slots" id="timeSlots">
-                            <p class="empty-state">시간을 불러오는 중...</p>
-                        </div>
+                    <!-- 시간 선택 (날짜 선택 후 표시) -->
+                    <div class="time-select-card" id="timeSelectCard" style="display: none;">
+                        <h3 id="timeSelectDate">-</h3>
+                        <div class="time-slots" id="timeSlots"></div>
                     </div>
 
-                    <button class="back-step-btn" id="backToStep1">← 날짜 다시 선택</button>
+                    <div class="step2-actions">
+                        <button class="back-step-btn" id="backToStep1">← 과정 다시 선택</button>
+                        <button class="next-btn" id="toStep3Btn" disabled>다음 단계로</button>
+                    </div>
                 </div>
             </section>
 
-            <!-- Step 3: 정보 입력 -->
+            <!-- Step 3: 사전 신청서 -->
             <section class="booking-step" id="step3" style="display: none;">
                 <div class="step-content">
-                    <h2>예약 정보를 입력해주세요</h2>
+                    <h2>사전 신청서를 작성해주세요</h2>
                     <p class="step-desc">
-                        <strong id="bookingDateTimeDisplay">-</strong>
+                        <strong id="step3CourseInfo">-</strong>
                     </p>
+
+                    <!-- 선택한 일정 요약 -->
+                    <div class="schedule-summary" id="step3Schedules"></div>
 
                     <div class="booking-form-card">
                         <form id="bookingForm">
-                            <div class="form-section">
-                                <h3>상담 과정 선택</h3>
-                                <div class="course-options" id="courseOptions">
-                                    <label class="course-option">
-                                        <input type="radio" name="course" value="basic" checked>
-                                        <div class="course-card">
-                                            <div class="course-info">
-                                                <span class="course-name">기본 컨설팅</span>
-                                                <span class="course-desc">1:1 면접 기초 피드백</span>
-                                            </div>
-                                            <span class="course-price">150,000원</span>
-                                        </div>
+                            <!-- 이름 -->
+                            <div class="form-group">
+                                <label for="customerName">이름 <span class="required">*</span></label>
+                                <input type="text" id="customerName" name="customerName" required placeholder="홍길동">
+                            </div>
+                            <!-- 나이 -->
+                            <div class="form-group">
+                                <label for="customerAge">나이 <span class="required">*</span></label>
+                                <input type="number" id="customerAge" name="customerAge" required placeholder="27" min="1" max="100">
+                            </div>
+                            <!-- 전화번호 -->
+                            <div class="form-group">
+                                <label for="customerPhone">전화번호 <span class="required">*</span></label>
+                                <input type="tel" id="customerPhone" name="customerPhone" required placeholder="01012345678">
+                            </div>
+                            <!-- 현금영수증 -->
+                            <div class="form-group">
+                                <label>현금영수증 발급 여부 <span class="required">*</span></label>
+                                <div class="receipt-options">
+                                    <label class="radio-option">
+                                        <input type="radio" name="receipt" value="yes">
+                                        <span>발급</span>
                                     </label>
-                                    <label class="course-option">
-                                        <input type="radio" name="course" value="standard">
-                                        <div class="course-card">
-                                            <div class="course-info">
-                                                <span class="course-name">스탠다드 컨설팅</span>
-                                                <span class="course-desc">심층 피드백 + 모의 면접</span>
-                                            </div>
-                                            <span class="course-price">250,000원</span>
-                                        </div>
-                                    </label>
-                                    <label class="course-option">
-                                        <input type="radio" name="course" value="premium">
-                                        <div class="course-card">
-                                            <div class="course-info">
-                                                <span class="course-name">프리미엄 컨설팅</span>
-                                                <span class="course-desc">전체 과정 + 무제한 피드백</span>
-                                            </div>
-                                            <span class="course-price">400,000원</span>
-                                        </div>
+                                    <label class="radio-option">
+                                        <input type="radio" name="receipt" value="no" checked>
+                                        <span>미발급</span>
                                     </label>
                                 </div>
                             </div>
-
-                            <div class="form-section">
-                                <h3>예약자 정보</h3>
-                                <div class="form-group">
-                                    <label for="customerName">이름 <span class="required">*</span></label>
-                                    <input type="text" id="customerName" name="customerName" required placeholder="홍길동">
-                                </div>
-                                <div class="form-group">
-                                    <label for="customerPhone">연락처 <span class="required">*</span></label>
-                                    <input type="tel" id="customerPhone" name="customerPhone" required placeholder="010-1234-5678">
-                                </div>
-                                <div class="form-group">
-                                    <label for="customerEmail">이메일</label>
-                                    <input type="email" id="customerEmail" name="customerEmail" placeholder="example@email.com">
-                                </div>
-                                <div class="form-group">
-                                    <label for="customerMemo">요청사항</label>
-                                    <textarea id="customerMemo" name="customerMemo" rows="3" placeholder="상담 전 전달하고 싶은 내용을 작성해주세요"></textarea>
+                            <div class="form-group" id="receiptNumberGroup" style="display: none;">
+                                <label for="receiptNumber">현금영수증 발급 번호 <span class="required">*</span></label>
+                                <div class="receipt-number-row">
+                                    <input type="text" id="receiptNumber" name="receiptNumber" placeholder="휴대전화 번호 또는 사업자 번호">
+                                    <button type="button" class="same-phone-btn" id="samePhoneBtn">전화번호 동일</button>
                                 </div>
                             </div>
-
-                            <div class="form-section">
-                                <h3>결제 안내</h3>
-                                <div class="payment-info">
-                                    <p>예약 신청 후 <strong>24시간 이내</strong>에 아래 계좌로 입금해주세요.</p>
-                                    <div class="account-info">
-                                        <span class="bank">카카오뱅크</span>
-                                        <span class="account-number">3333-12-3456789</span>
-                                        <span class="account-holder">윤소윤</span>
+                            <!-- 이메일 -->
+                            <div class="form-group">
+                                <label for="customerEmail">이메일 <span class="required">*</span></label>
+                                <input type="email" id="customerEmail" name="customerEmail" required placeholder="example@email.com">
+                                <p class="form-hint">입력하신 이메일로 사전제출 자료가 발송됩니다. 자주 사용하시는 이메일로 작성해주세요.</p>
+                            </div>
+                            <!-- 거주지역 -->
+                            <div class="form-group">
+                                <label for="customerRegion">거주지역 <span class="required">*</span></label>
+                                <input type="text" id="customerRegion" name="customerRegion" required placeholder="서울시 강남구">
+                            </div>
+                            <!-- 지원기업 -->
+                            <div class="form-group">
+                                <label for="customerCompany">지원기업 <span class="required">*</span></label>
+                                <input type="text" id="customerCompany" name="customerCompany" required placeholder="지원 예정 기업명">
+                            </div>
+                            <!-- 지원직무 -->
+                            <div class="form-group">
+                                <label for="customerPosition">지원직무 <span class="required">*</span></label>
+                                <input type="text" id="customerPosition" name="customerPosition" required placeholder="지원 예정 직무">
+                            </div>
+                            <!-- 면접일 -->
+                            <div class="form-group">
+                                <label for="customerInterviewDate">면접일 <span class="required">*</span></label>
+                                <input type="text" id="customerInterviewDate" name="customerInterviewDate" required placeholder="예: 2025-03-15 또는 미정">
+                                <p class="form-hint">면접 예정일을 작성해주세요. 면접일이 예정되어있지 않은 경우 대략적인 일정이나 '미정'으로 입력해주세요.</p>
+                            </div>
+                            <!-- 면접 진행 해당 절차 -->
+                            <div class="form-group">
+                                <label>면접 진행 해당 절차 <span class="required">*</span></label>
+                                <p class="form-hint">면접에서 진행되는 면접유형을 모두 선택해주세요.</p>
+                                <div class="checkbox-options" id="interviewTypeOptions">
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="interviewType" value="일반 인터뷰 면접 (다대일)">
+                                        <span>일반 인터뷰 면접 (다대일)</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="interviewType" value="집단 면접 (다대다)">
+                                        <span>집단 면접 (다대다)</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="interviewType" value="PT 발표 면접">
+                                        <span>PT 발표 면접</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="interviewType" value="토론면접">
+                                        <span>토론면접</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="interviewType" value="기타">
+                                        <span>기타</span>
+                                    </label>
+                                </div>
+                                <div class="form-group" id="interviewTypeEtcGroup" style="display: none;">
+                                    <input type="text" id="interviewTypeEtc" name="interviewTypeEtc" placeholder="직접 입력해주세요">
+                                </div>
+                            </div>
+                            <!-- 컨설팅 진행 희망 방식 -->
+                            <div class="form-group">
+                                <label>컨설팅 진행 희망 방식 <span class="required">*</span></label>
+                                <div class="radio-options-vertical">
+                                    <label class="radio-option">
+                                        <input type="radio" name="consultMethod" value="비대면(ZOOM)" required>
+                                        <span>비대면 (ZOOM)</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="consultMethod" value="대면(연구소 방문)">
+                                        <span>대면 (연구소 방문)</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="consultMethod" value="비대면/대면 혼합">
+                                        <span>비대면/대면 혼합</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- 윤쌤을 어떻게 알게 되셨나요 -->
+                            <div class="form-group">
+                                <label>윤쌤을 어떻게 알게 되셨나요? <span class="required">*</span></label>
+                                <div class="checkbox-options" id="referralOptions">
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="referral" value="유튜브">
+                                        <span>유튜브</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="referral" value="인스타그램">
+                                        <span>인스타그램</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="referral" value="네이버">
+                                        <span>네이버</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="referral" value="강연">
+                                        <span>강연</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="referral" value="지인소개">
+                                        <span>지인소개</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="referral" value="기타">
+                                        <span>기타</span>
+                                    </label>
+                                </div>
+                                <div class="form-group" id="referralEtcGroup" style="display: none;">
+                                    <input type="text" id="referralEtc" name="referralEtc" placeholder="직접 입력해주세요">
+                                </div>
+                            </div>
+                            <!-- 환불정책 안내 -->
+                            <div class="form-group">
+                                <label>환불정책 안내 <span class="required">*</span></label>
+                                <div class="refund-policy-box">
+                                    <h4>✅ 환불 정책 안내</h4>
+                                    <div class="policy-section">
+                                        <strong>1. 환불 가능 시점</strong>
+                                        <ul>
+                                            <li>컨설팅 진행 전: 예약 일자 기준 24시간 전 전액 환불 가능</li>
+                                            <li>컨설팅 진행 후: 진행된 회차 및 제공된 서비스에 따라 환불 금액 산정</li>
+                                            <li>당일 취소는 1회 차감을 원칙으로 합니다.</li>
+                                        </ul>
                                     </div>
-                                    <p class="notice">입금 확인 후 예약이 확정됩니다.</p>
+                                    <div class="policy-section">
+                                        <strong>2. 환불 기준</strong>
+                                        <ul>
+                                            <li>각 과정(올케어, 퍼펙트, 피니쉬)에 따라, 진행 회차에 따른 환불 금액이 다르게 적용됩니다.</li>
+                                            <li>아래 과정별 환불 정책 표를 참고하세요.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="policy-section">
+                                        <strong>3. 환불 불가 회차 안내</strong>
+                                        <ul>
+                                            <li>퍼펙트, 피니쉬 과정은 장기 과정으로, 제공된 서비스의 가치와 지원 범위를 고려하여 퍼펙트(5회) 잔여 1회차, 피니쉬(8회) 잔여 2회차에 대한 환불은 제공되지 않습니다.</li>
+                                            <li>잔여 회차의 경우 컨설팅 당해 연말까지(12월31일) 사용하실 수 있으며, 양도는 불가합니다.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="policy-section">
+                                        <strong>4. 기타 안내 사항</strong>
+                                        <ul>
+                                            <li>컨설팅 금액은 무제한 질문, 영상피드백, 연습실 대관 등의 관리비용이 모두 포함되어 산정된 금액입니다.</li>
+                                            <li>환불 금액은 요청일로부터 7일(영업일 기준) 이내에 처리됩니다.</li>
+                                            <li>온라인 강좌를 제공받은 경우 강좌원가를 제외하고 환불됩니다.</li>
+                                            <li>컨설팅 시작 전 사전 자료(교재) 등을 전달 받은 경우 안내에 따라 교재 비용을 제외하고 환불됩니다.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="policy-section">
+                                        <strong>5. 환불금액</strong>
+                                        <p class="policy-table-title">📂 올케어 과정 환불 정책 (3회 95만원)</p>
+                                        <table class="refund-table">
+                                            <thead><tr><th>진행회차</th><th>잔여회차</th><th>환불금액</th></tr></thead>
+                                            <tbody>
+                                                <tr><td>1회 진행</td><td>2회</td><td>55만원</td></tr>
+                                                <tr><td>2회 진행</td><td>1회</td><td>15만원</td></tr>
+                                            </tbody>
+                                        </table>
+                                        <p class="policy-table-title">📂 퍼펙트 과정 환불 정책 (5회 140만원)</p>
+                                        <table class="refund-table">
+                                            <thead><tr><th>진행회차</th><th>잔여회차</th><th>환불금액</th></tr></thead>
+                                            <tbody>
+                                                <tr><td>1회 진행</td><td>4회</td><td>100만원</td></tr>
+                                                <tr><td>2회 진행</td><td>3회</td><td>60만원</td></tr>
+                                                <tr><td>3회 진행</td><td>2회</td><td>35만원</td></tr>
+                                                <tr><td>4회 진행</td><td>1회</td><td>없음</td></tr>
+                                            </tbody>
+                                        </table>
+                                        <p class="policy-table-title">📂 피니쉬 과정 환불 정책 (8회 200만원)</p>
+                                        <table class="refund-table">
+                                            <thead><tr><th>진행회차</th><th>잔여회차</th><th>환불금액</th></tr></thead>
+                                            <tbody>
+                                                <tr><td>1회 진행</td><td>7회</td><td>160만원</td></tr>
+                                                <tr><td>2회 진행</td><td>6회</td><td>120만원</td></tr>
+                                                <tr><td>3회 진행</td><td>5회</td><td>95만원</td></tr>
+                                                <tr><td>4회 진행</td><td>4회</td><td>60만원</td></tr>
+                                                <tr><td>5회 진행</td><td>3회</td><td>25만원</td></tr>
+                                                <tr><td>6회 진행</td><td>2회</td><td>없음</td></tr>
+                                                <tr><td>7회 진행</td><td>1회</td><td>없음</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <label class="checkbox-option refund-agree">
+                                    <input type="checkbox" id="refundAgree" name="refundAgree" required>
+                                    <span>환불정책을 확인하였으며, 동의합니다.</span>
+                                </label>
+                            </div>
+                            <!-- 개인정보 이용 동의 -->
+                            <div class="form-group">
+                                <label>개인정보 이용 동의 <span class="required">*</span></label>
+                                <div class="privacy-notice-box">
+                                    <p>컨설팅 진행중 발생하는 일련의 과정과 자료에 대하여 의뢰인을 특정할 만한 정보를 제외(익명보장)하고 수업 연구 및 마케팅 목적으로 활용될 수 있습니다. 컨설팅에 필요한 개인정보를 수집 및 활용 하는데 동의하십니까?</p>
+                                    <p class="privacy-notice-warn">* 미동의시 컨설팅 신청에 제한이 있을 수 있습니다.</p>
+                                </div>
+                                <div class="radio-options-vertical">
+                                    <label class="radio-option">
+                                        <input type="radio" name="privacyAgree" value="동의" required>
+                                        <span>동의합니다</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="privacyAgree" value="미동의">
+                                        <span>동의하지 않습니다</span>
+                                    </label>
                                 </div>
                             </div>
 
                             <div class="form-actions">
-                                <button type="button" class="back-step-btn" id="backToStep2">← 시간 다시 선택</button>
+                                <button type="button" class="back-step-btn" id="backToStep2">← 일정 다시 선택</button>
                                 <button type="submit" class="submit-btn">예약 신청하기</button>
                             </div>
                         </form>
@@ -189,53 +420,47 @@
                 </div>
             </section>
 
-            <!-- Step 4: 예약 완료 -->
+            <!-- Step 4: 입금 안내 -->
             <section class="booking-step" id="step4" style="display: none;">
                 <div class="step-content">
-                    <div class="completion-card">
-                        <div class="completion-icon">✓</div>
-                        <h2>예약 신청이 완료되었습니다!</h2>
-                        <p class="completion-desc">입금 확인 후 예약이 확정됩니다.</p>
-
-                        <div class="booking-summary">
-                            <h3>예약 정보</h3>
-                            <div class="summary-item">
-                                <span class="summary-label">예약 번호</span>
-                                <span class="summary-value" id="summaryId">-</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">예약 일시</span>
-                                <span class="summary-value" id="summaryDateTime">-</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">상담 과정</span>
-                                <span class="summary-value" id="summaryCourse">-</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">예약자</span>
-                                <span class="summary-value" id="summaryName">-</span>
-                            </div>
-                            <div class="summary-item">
-                                <span class="summary-label">연락처</span>
-                                <span class="summary-value" id="summaryPhone">-</span>
-                            </div>
-                            <div class="summary-item highlight">
-                                <span class="summary-label">결제 금액</span>
-                                <span class="summary-value" id="summaryPrice">-</span>
-                            </div>
+                    <div class="payment-card">
+                        <div class="payment-completion-msg">
+                            <p class="completion-main"><strong id="paymentName">-</strong>님 예약 신청이 완료되었습니다.</p>
+                            <p class="completion-main">입금 완료 후 예약이 최종 확정됩니다.</p>
+                            <p class="completion-main">입금 확인 후 컨설팅 최종 확정 안내 문자가 발송됩니다.</p>
+                            <p class="completion-warning">2시간 내 미입금시 예약은 자동 취소됩니다.</p>
                         </div>
 
-                        <div class="payment-reminder">
-                            <h4>입금 계좌</h4>
-                            <div class="account-info large">
-                                <span class="bank">카카오뱅크</span>
-                                <span class="account-number">3333-12-3456789</span>
-                                <span class="account-holder">윤소윤</span>
+                        <div class="payment-account-box">
+                            <div class="account-row">
+                                <span class="account-label">예금주</span>
+                                <span class="account-value">윤소윤</span>
                             </div>
-                            <p>24시간 이내 입금을 완료해주세요.</p>
+                            <div class="account-row">
+                                <span class="account-label">입금 계좌</span>
+                                <span class="account-value" id="accountNumber">국민은행 49810201307635</span>
+                            </div>
+                            <div class="account-row highlight">
+                                <span class="account-label">입금 금액</span>
+                                <span class="account-value price" id="paymentAmount">-</span>
+                            </div>
+                            <button class="copy-account-btn" id="copyAccountBtn">계좌번호 복사하기</button>
                         </div>
 
-                        <button class="new-booking-btn" onclick="location.reload()">새 예약하기</button>
+                        <div class="payment-notice">
+                            <p>사전 제출 자료가 이메일로 송부됩니다.</p>
+                            <p>사전 제출 자료를 작성하여 <strong>컨설팅 2일 전까지</strong> 제출해주세요.</p>
+                        </div>
+
+                        <!-- 예약 정보 요약 -->
+                        <div class="booking-summary-section">
+                            <h3>예약 신청 내역</h3>
+                            <div class="summary-item">
+                                <span class="summary-label">과정</span>
+                                <span class="summary-value" id="summaryCourseName">-</span>
+                            </div>
+                            <div class="summary-schedules" id="summarySchedules"></div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -244,7 +469,6 @@
         <!-- 푸터 -->
         <footer class="booking-footer">
             <p>© 2024 윤스피치. All rights reserved.</p>
-            <p>문의: contact@yoonspeech.com</p>
         </footer>
     </div>
 

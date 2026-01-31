@@ -948,11 +948,28 @@ body {
 
 .reservation-info {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 6px 16px;
     font-size: 14px;
     color: var(--gray-600);
+    margin-bottom: 12px;
+}
+
+.reservation-schedules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     margin-bottom: 16px;
+}
+
+.schedule-chip {
+    display: inline-block;
+    padding: 4px 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .reservation-actions {
@@ -1169,6 +1186,399 @@ body {
     }
 }
 
+/* ===== Reservation Detail Modal ===== */
+.detail-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 900;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 16px;
+    overflow-y: auto;
+}
+
+.detail-modal-overlay.active {
+    display: flex;
+}
+
+.detail-modal {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 560px;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideUp 0.25s ease;
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.detail-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.detail-modal-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.detail-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--gray-100);
+    border-radius: 50%;
+    font-size: 20px;
+    color: var(--gray-500);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.detail-modal-close:hover {
+    background: var(--gray-200);
+}
+
+.detail-modal-body {
+    padding: 8px 24px 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.detail-section {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+}
+
+.detail-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 6px 0;
+    gap: 12px;
+}
+
+.detail-label {
+    flex-shrink: 0;
+    width: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-500);
+    padding-top: 2px;
+}
+
+.detail-value {
+    flex: 1;
+    font-size: 14px;
+    color: var(--gray-800);
+    word-break: break-all;
+}
+
+.detail-chip {
+    display: inline-block;
+    padding: 3px 10px;
+    background: var(--gray-100);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin: 2px 4px 2px 0;
+}
+
+.detail-schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-schedule-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.detail-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.detail-status-badge.pending {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.detail-status-badge.confirmed {
+    background: var(--success-light);
+    color: #065F46;
+}
+
+.detail-modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.detail-modal-footer:empty {
+    display: none;
+}
+
+.detail-confirm-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.detail-confirm-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* Clickable reservation item */
+.reservation-item.clickable {
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.reservation-item.clickable:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+/* ===== Detail Modal Footer Buttons ===== */
+.detail-footer-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.detail-edit-btn {
+    flex: 1;
+    padding: 14px;
+    background: var(--white);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius);
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.detail-edit-btn:hover {
+    background: var(--primary-light);
+}
+
+.detail-delete-btn {
+    flex: 1;
+    padding: 14px;
+    background: var(--white);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+    color: var(--danger);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.detail-delete-btn:hover {
+    background: var(--danger-light);
+}
+
+.detail-footer-buttons .detail-confirm-btn {
+    flex: 1;
+}
+
+/* ===== Edit Schedule Modal ===== */
+.edit-schedule-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 950;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 16px;
+    overflow-y: auto;
+}
+
+.edit-schedule-modal-overlay.active {
+    display: flex;
+}
+
+.edit-schedule-modal {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 500px;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideUp 0.25s ease;
+}
+
+.edit-schedule-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.edit-schedule-modal-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.edit-schedule-modal-body {
+    padding: 20px 24px;
+}
+
+.edit-schedule-desc {
+    font-size: 14px;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+}
+
+.edit-schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.edit-schedule-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+}
+
+.edit-schedule-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    white-space: nowrap;
+    min-width: 48px;
+}
+
+.edit-date-input {
+    padding: 8px 10px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+.edit-date-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.edit-time-select {
+    padding: 8px 10px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 14px;
+    min-width: 90px;
+    background: var(--white);
+}
+
+.edit-time-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.edit-schedule-modal-footer {
+    display: flex;
+    gap: 8px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.edit-cancel-btn {
+    flex: 1;
+    padding: 12px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    color: var(--gray-600);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.edit-cancel-btn:hover {
+    background: var(--gray-50);
+}
+
+.edit-save-btn {
+    flex: 1;
+    padding: 12px;
+    background: var(--primary);
+    border: none;
+    border-radius: var(--radius);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.edit-save-btn:hover {
+    background: var(--primary-dark);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
     .main-content {
@@ -1236,6 +1646,43 @@ body {
     .reservation-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .detail-modal-overlay {
+        padding: 20px 8px;
+    }
+
+    .detail-modal-body {
+        padding: 8px 16px 16px;
+    }
+
+    .detail-modal-header {
+        padding: 16px;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .detail-label {
+        width: auto;
+    }
+
+    .detail-footer-buttons {
+        flex-direction: column;
+    }
+
+    .edit-schedule-modal-overlay {
+        padding: 20px 8px;
+    }
+
+    .edit-schedule-row {
+        flex-wrap: wrap;
+    }
+
+    .edit-date-input {
+        flex: 1 1 100%;
     }
 }
 

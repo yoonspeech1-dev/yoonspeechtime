@@ -797,6 +797,20 @@ function setupEventListeners() {
     // 설정 저장
     document.getElementById('saveSettings').addEventListener('click', saveSettings);
 
+    // 예약 상세보기 모달 닫기
+    document.getElementById('detailModalClose').addEventListener('click', closeReservationDetail);
+    document.getElementById('detailModalOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeReservationDetail();
+    });
+
+    // 일정 수정 모달 이벤트
+    document.getElementById('editScheduleModalClose').addEventListener('click', closeEditScheduleModal);
+    document.getElementById('editScheduleCancelBtn').addEventListener('click', closeEditScheduleModal);
+    document.getElementById('editScheduleSaveBtn').addEventListener('click', saveEditedSchedules);
+    document.getElementById('editScheduleModalOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeEditScheduleModal();
+    });
+
     // 링크 관리 날짜 기본값
     const today = new Date();
     document.getElementById('linkStartDate').value = formatDate(today);
@@ -817,10 +831,11 @@ function renderReservations(filter = 'all', searchTerm = '') {
 
     if (searchTerm) {
         const term = searchTerm.toLowerCase();
-        filteredReservations = filteredReservations.filter(r =>
-            r.name.toLowerCase().includes(term) ||
-            r.phone.includes(term)
-        );
+        filteredReservations = filteredReservations.filter(r => {
+            const name = (r.customerName || r.name || '').toLowerCase();
+            const phone = r.customerPhone || r.phone || '';
+            return name.includes(term) || phone.includes(term);
+        });
     }
 
     // 입금대기 개수 업데이트
@@ -838,26 +853,61 @@ function renderReservations(filter = 'all', searchTerm = '') {
         return;
     }
 
-    container.innerHTML = filteredReservations.map(reservation => `
-        <div class="reservation-item ${reservation.status === 'confirmed' ? 'confirmed' : ''}">
-            <div class="reservation-item-header">
-                <span class="reservation-name">${reservation.name}</span>
-                <span class="reservation-status ${reservation.status}">
-                    ${reservation.status === 'pending' ? '입금대기' : '예약확정'}
-                </span>
-            </div>
-            <div class="reservation-info">
-                <span>${reservation.phone}</span>
-                <span>${reservation.course} (${reservation.sessions}회)</span>
-                <span>${reservation.dates.map(d => `${formatDateShort(d.date)} ${d.time}`).join(', ')}</span>
-            </div>
-            ${reservation.status === 'pending' ? `
-                <div class="reservation-actions">
-                    <button class="confirm-btn" onclick="confirmReservation('${reservation.id}')">예약 확정</button>
+    container.innerHTML = filteredReservations.map(reservation => {
+        const name = reservation.customerName || reservation.name || '-';
+        const phone = reservation.customerPhone || reservation.phone || '-';
+        const courseName = reservation.courseName || reservation.course || '-';
+        const schedules = reservation.schedules || reservation.dates || [];
+        const price = reservation.price ? (reservation.price).toLocaleString('ko-KR') + '원' : '-';
+
+        return `
+            <div class="reservation-item clickable ${reservation.status === 'confirmed' ? 'confirmed' : ''}" data-id="${reservation.id}">
+                <div class="reservation-item-header">
+                    <span class="reservation-name">${name}</span>
+                    <span class="reservation-status ${reservation.status}">
+                        ${reservation.status === 'pending' ? '입금대기' : '예약확정'}
+                    </span>
                 </div>
-            ` : ''}
-        </div>
-    `).join('');
+                <div class="reservation-info">
+                    <span>${phone}</span>
+                    <span>${courseName}</span>
+                    <span>${price}</span>
+                </div>
+                <div class="reservation-schedules">
+                    ${schedules.map((s, i) => `<span class="schedule-chip">${i + 1}회 ${formatDateShort(s.date)} ${s.time}</span>`).join('')}
+                </div>
+                ${reservation.status === 'pending' ? `
+                    <div class="reservation-actions">
+                        <button class="confirm-btn" onclick="event.stopPropagation(); confirmReservation('${reservation.id}')">예약 확정</button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+
+    // 예약 아이템 클릭 시 상세보기 모달 열기
+    container.querySelectorAll('.reservation-item.clickable').forEach(item => {
+        item.addEventListener('click', () => {
+            showReservationDetail(item.dataset.id);
+        });
+    });
+}
+
+// 예약 시간 기준으로 블록해야 할 슬롯 목록 반환 (컨설팅 90분 + 준비 30분 = 120분)
+function getBlockedSlots(bookedTime) {
+    const BLOCK_MINUTES = 120;
+    const [h, m] = bookedTime.split(':').map(Number);
+    const startMin = h * 60 + m;
+    const interval = state.settings.interval || 60;
+    const slots = [];
+
+    // 예약 시간 자체 + 이후 120분 이내의 슬롯들
+    for (let min = startMin; min < startMin + BLOCK_MINUTES; min += interval) {
+        const slotH = Math.floor(min / 60);
+        const slotM = min % 60;
+        slots.push(`${String(slotH).padStart(2, '0')}:${String(slotM).padStart(2, '0')}`);
+    }
+    return slots;
 }
 
 // 예약 확정
@@ -866,31 +916,345 @@ function confirmReservation(reservationId) {
     if (reservation) {
         reservation.status = 'confirmed';
 
-        // 해당 타임 블록들을 예약 완료로 변경
-        reservation.dates.forEach(({ date, time }) => {
+        // 해당 타임 블록들을 예약 완료로 변경 (2시간 블록 적용)
+        const schedules = reservation.schedules || reservation.dates || [];
+        schedules.forEach(({ date, time }) => {
             if (!state.timeBlocks[date]) {
                 state.timeBlocks[date] = {};
             }
-            state.timeBlocks[date][time] = 'booked';
-
-            // 다음 시간도 잠금 (90분 수업 기준)
-            const [hour, min] = time.split(':').map(Number);
-            const nextHour = hour + 1;
-            const nextTime = `${String(nextHour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
-            if (state.timeBlocks[date]) {
-                state.timeBlocks[date][nextTime] = 'booked';
-            }
+            // 예약 시간 + 이후 120분 이내 슬롯 모두 booked 처리
+            const blockedSlots = getBlockedSlots(time);
+            blockedSlots.forEach(slot => {
+                state.timeBlocks[date][slot] = 'booked';
+            });
         });
 
         saveToLocalStorage();
         renderReservations();
         renderCalendar();
         renderTimeBlocks();
-        showToast('예약이 확정되었습니다');
+
+        const name = reservation.customerName || reservation.name || '';
+        showToast(`${name}님의 예약이 확정되었습니다`);
+
+        // 문자 발송 (부가 기능 - 실패해도 예약 확정은 유지)
+        const phone = reservation.customerPhone || reservation.phone || '';
+        const courseName = reservation.courseName || reservation.course || '';
+        if (phone) {
+            sendConfirmationSMS({
+                to: phone,
+                customerName: name,
+                courseName: courseName,
+                schedules: schedules,
+            });
+        }
+    }
+}
+
+async function sendConfirmationSMS(payload) {
+    try {
+        const res = await fetch('/api/send-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+            showToast('문자가 발송되었습니다');
+        } else {
+            showToast('예약은 확정되었으나 문자 발송에 실패했습니다');
+        }
+    } catch (e) {
+        console.error('SMS 발송 요청 실패:', e);
+        showToast('예약은 확정되었으나 문자 발송에 실패했습니다');
     }
 }
 
 window.confirmReservation = confirmReservation;
+
+// ===== 예약 상세보기 =====
+function showReservationDetail(reservationId) {
+    const reservation = state.reservations.find(r => r.id === reservationId);
+    if (!reservation) return;
+
+    // 기본 정보
+    document.getElementById('detailName').textContent = reservation.customerName || reservation.name || '-';
+    document.getElementById('detailAge').textContent = reservation.customerAge || '-';
+    document.getElementById('detailPhone').textContent = reservation.customerPhone || reservation.phone || '-';
+    document.getElementById('detailEmail').textContent = reservation.customerEmail || '-';
+
+    // 현금영수증
+    document.getElementById('detailReceipt').textContent = reservation.receipt ? '발급' : '미발급';
+    const receiptNumRow = document.getElementById('detailReceiptNumberRow');
+    if (reservation.receipt && reservation.receiptNumber) {
+        receiptNumRow.style.display = 'flex';
+        document.getElementById('detailReceiptNumber').textContent = reservation.receiptNumber;
+    } else {
+        receiptNumRow.style.display = 'none';
+    }
+
+    // 컨설팅 정보
+    document.getElementById('detailCourse').textContent = reservation.courseName || reservation.course || '-';
+    document.getElementById('detailPrice').textContent = reservation.price ? reservation.price.toLocaleString('ko-KR') + '원' : '-';
+
+    const schedules = reservation.schedules || reservation.dates || [];
+    const schedulesEl = document.getElementById('detailSchedules');
+    if (schedules.length > 0) {
+        schedulesEl.innerHTML = '<div class="detail-schedule-list">' +
+            schedules.map((s, i) => `<span class="detail-schedule-item">${i + 1}회 ${formatDateKorean(s.date)} ${s.time}</span>`).join('') +
+            '</div>';
+    } else {
+        schedulesEl.textContent = '-';
+    }
+
+    // 면접 정보
+    document.getElementById('detailRegion').textContent = reservation.customerRegion || '-';
+    document.getElementById('detailCompany').textContent = reservation.customerCompany || '-';
+    document.getElementById('detailPosition').textContent = reservation.customerPosition || '-';
+    document.getElementById('detailInterviewDate').textContent = reservation.customerInterviewDate || '-';
+
+    const interviewTypes = reservation.interviewTypes || [];
+    const interviewEl = document.getElementById('detailInterviewTypes');
+    if (interviewTypes.length > 0) {
+        interviewEl.innerHTML = interviewTypes.map(t => `<span class="detail-chip">${t}</span>`).join('');
+    } else {
+        interviewEl.textContent = '-';
+    }
+
+    // 기타 정보
+    document.getElementById('detailConsultMethod').textContent = reservation.consultMethod || '-';
+
+    const referrals = reservation.referrals || [];
+    const referralsEl = document.getElementById('detailReferrals');
+    if (referrals.length > 0) {
+        referralsEl.innerHTML = referrals.map(r => `<span class="detail-chip">${r}</span>`).join('');
+    } else {
+        referralsEl.textContent = '-';
+    }
+
+    // 동의 항목
+    document.getElementById('detailRefundAgree').textContent = reservation.refundAgree ? '동의' : '미동의';
+    document.getElementById('detailPrivacyAgree').textContent = reservation.privacyAgree || '-';
+
+    // 예약 메타
+    document.getElementById('detailReservationId').textContent = reservation.id || '-';
+    document.getElementById('detailCreatedAt').textContent = reservation.createdAt
+        ? new Date(reservation.createdAt).toLocaleString('ko-KR')
+        : '-';
+
+    const statusEl = document.getElementById('detailStatus');
+    statusEl.innerHTML = reservation.status === 'confirmed'
+        ? '<span class="detail-status-badge confirmed">예약확정</span>'
+        : '<span class="detail-status-badge pending">입금대기</span>';
+
+    // 하단 버튼
+    const footer = document.getElementById('detailModalFooter');
+    if (reservation.status === 'pending') {
+        footer.innerHTML = `
+            <div class="detail-footer-buttons">
+                <button class="detail-edit-btn" id="detailEditBtn">일정 수정</button>
+                <button class="detail-confirm-btn" id="detailConfirmBtn">예약 확정</button>
+                <button class="detail-delete-btn" id="detailDeleteBtn">예약 삭제</button>
+            </div>`;
+        document.getElementById('detailConfirmBtn').addEventListener('click', () => {
+            confirmReservation(reservation.id);
+            closeReservationDetail();
+        });
+    } else {
+        footer.innerHTML = `
+            <div class="detail-footer-buttons">
+                <button class="detail-edit-btn" id="detailEditBtn">일정 수정</button>
+                <button class="detail-delete-btn" id="detailDeleteBtn">예약 삭제</button>
+            </div>`;
+    }
+
+    // 일정 수정 버튼 이벤트
+    document.getElementById('detailEditBtn').addEventListener('click', () => {
+        openEditScheduleModal(reservation.id);
+    });
+
+    // 예약 삭제 버튼 이벤트
+    document.getElementById('detailDeleteBtn').addEventListener('click', () => {
+        deleteReservation(reservation.id);
+    });
+
+    document.getElementById('detailModalOverlay').classList.add('active');
+}
+
+function closeReservationDetail() {
+    document.getElementById('detailModalOverlay').classList.remove('active');
+}
+
+// ===== 예약 삭제 =====
+function deleteReservation(reservationId) {
+    const reservation = state.reservations.find(r => r.id === reservationId);
+    if (!reservation) return;
+
+    const name = reservation.customerName || reservation.name || '';
+    if (!confirm(`${name}님의 예약을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+
+    // 해당 예약의 booked 슬롯을 available로 복원
+    const schedules = reservation.schedules || reservation.dates || [];
+    schedules.forEach(({ date, time }) => {
+        if (state.timeBlocks[date]) {
+            const blockedSlots = getBlockedSlots(time);
+            blockedSlots.forEach(slot => {
+                if (state.timeBlocks[date][slot] === 'booked') {
+                    state.timeBlocks[date][slot] = 'available';
+                }
+            });
+        }
+    });
+
+    // reservations에서 제거
+    state.reservations = state.reservations.filter(r => r.id !== reservationId);
+
+    saveToLocalStorage();
+    renderReservations();
+    renderCalendar();
+    renderTimeBlocks();
+    closeReservationDetail();
+    showToast(`${name}님의 예약이 삭제되었습니다`);
+}
+
+window.deleteReservation = deleteReservation;
+
+// ===== 일정 수정 모달 =====
+function openEditScheduleModal(reservationId) {
+    const reservation = state.reservations.find(r => r.id === reservationId);
+    if (!reservation) return;
+
+    const schedules = reservation.schedules || reservation.dates || [];
+    const container = document.getElementById('editScheduleList');
+
+    container.innerHTML = schedules.map((s, i) => `
+        <div class="edit-schedule-row" data-index="${i}">
+            <span class="edit-schedule-label">${i + 1}회차</span>
+            <input type="date" class="edit-date-input" value="${s.date}" data-index="${i}">
+            <select class="edit-time-select" data-index="${i}">
+                <option value="${s.time}">${s.time}</option>
+            </select>
+        </div>
+    `).join('');
+
+    // 각 날짜 input에 change 이벤트 바인딩
+    container.querySelectorAll('.edit-date-input').forEach(input => {
+        const idx = parseInt(input.dataset.index);
+        const selectEl = container.querySelector(`.edit-time-select[data-index="${idx}"]`);
+        const currentTime = schedules[idx].time;
+
+        // 초기 로드: 현재 날짜의 available 시간 옵션 렌더링
+        renderEditTimeOptions(input.value, selectEl, currentTime, reservationId);
+
+        input.addEventListener('change', () => {
+            renderEditTimeOptions(input.value, selectEl, null, reservationId);
+        });
+    });
+
+    document.getElementById('editScheduleModal').dataset.reservationId = reservationId;
+    document.getElementById('editScheduleModalOverlay').classList.add('active');
+}
+
+function renderEditTimeOptions(dateStr, selectEl, currentTime, reservationId) {
+    const startTime = state.settings.startTime;
+    const endTime = state.settings.endTime;
+    const interval = state.settings.interval || 60;
+    const slots = generateTimeSlots(startTime, endTime, interval);
+
+    const reservation = state.reservations.find(r => r.id === reservationId);
+    const ownSchedules = reservation ? (reservation.schedules || reservation.dates || []) : [];
+
+    selectEl.innerHTML = '';
+
+    slots.forEach(time => {
+        const blockStatus = (state.timeBlocks[dateStr] && state.timeBlocks[dateStr][time]) || 'unavailable';
+
+        // 자기 자신의 예약 슬롯이면 선택 가능하게 표시
+        const isOwnSlot = ownSchedules.some(s => s.date === dateStr && s.time === time);
+
+        if (blockStatus === 'available' || isOwnSlot) {
+            const option = document.createElement('option');
+            option.value = time;
+            option.textContent = time;
+            if (time === currentTime) option.selected = true;
+            selectEl.appendChild(option);
+        }
+    });
+
+    if (selectEl.options.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '선택 가능한 시간 없음';
+        selectEl.appendChild(option);
+    }
+}
+
+function saveEditedSchedules() {
+    const reservationId = document.getElementById('editScheduleModal').dataset.reservationId;
+    const reservation = state.reservations.find(r => r.id === reservationId);
+    if (!reservation) return;
+
+    const container = document.getElementById('editScheduleList');
+    const rows = container.querySelectorAll('.edit-schedule-row');
+    const newSchedules = [];
+
+    for (const row of rows) {
+        const date = row.querySelector('.edit-date-input').value;
+        const time = row.querySelector('.edit-time-select').value;
+
+        if (!date || !time) {
+            showToast('날짜와 시간을 모두 선택해주세요');
+            return;
+        }
+        newSchedules.push({ date, time });
+    }
+
+    // 기존 booked 슬롯 해제
+    const oldSchedules = reservation.schedules || reservation.dates || [];
+    oldSchedules.forEach(({ date, time }) => {
+        if (state.timeBlocks[date]) {
+            const blockedSlots = getBlockedSlots(time);
+            blockedSlots.forEach(slot => {
+                if (state.timeBlocks[date][slot] === 'booked') {
+                    state.timeBlocks[date][slot] = 'available';
+                }
+            });
+        }
+    });
+
+    // 새 일정으로 booked 설정 (confirmed 상태인 경우에만)
+    if (reservation.status === 'confirmed') {
+        newSchedules.forEach(({ date, time }) => {
+            if (!state.timeBlocks[date]) {
+                state.timeBlocks[date] = {};
+            }
+            const blockedSlots = getBlockedSlots(time);
+            blockedSlots.forEach(slot => {
+                state.timeBlocks[date][slot] = 'booked';
+            });
+        });
+    }
+
+    // schedules 업데이트
+    reservation.schedules = newSchedules;
+
+    saveToLocalStorage();
+    renderReservations();
+    renderCalendar();
+    renderTimeBlocks();
+    closeEditScheduleModal();
+    closeReservationDetail();
+    showToast('일정이 수정되었습니다');
+}
+
+function closeEditScheduleModal() {
+    document.getElementById('editScheduleModalOverlay').classList.remove('active');
+}
+
+window.showReservationDetail = showReservationDetail;
+window.closeReservationDetail = closeReservationDetail;
+window.openEditScheduleModal = openEditScheduleModal;
+window.saveEditedSchedules = saveEditedSchedules;
+window.closeEditScheduleModal = closeEditScheduleModal;
 
 // ===== 초기화 =====
 function init() {

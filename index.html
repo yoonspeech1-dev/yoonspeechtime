@@ -272,6 +272,155 @@
         </section>
     </div>
 
+    <!-- 예약 상세보기 모달 -->
+    <div class="detail-modal-overlay" id="detailModalOverlay">
+        <div class="detail-modal">
+            <div class="detail-modal-header">
+                <h2>예약 신청서 상세</h2>
+                <button class="detail-modal-close" id="detailModalClose">&times;</button>
+            </div>
+            <div class="detail-modal-body" id="detailModalBody">
+                <!-- 기본 정보 -->
+                <div class="detail-section">
+                    <h3 class="detail-section-title">기본 정보</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">이름</span>
+                        <span class="detail-value" id="detailName">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">나이</span>
+                        <span class="detail-value" id="detailAge">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">전화번호</span>
+                        <span class="detail-value" id="detailPhone">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">이메일</span>
+                        <span class="detail-value" id="detailEmail">-</span>
+                    </div>
+                </div>
+
+                <!-- 현금영수증 -->
+                <div class="detail-section">
+                    <h3 class="detail-section-title">현금영수증</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">발급 여부</span>
+                        <span class="detail-value" id="detailReceipt">-</span>
+                    </div>
+                    <div class="detail-row" id="detailReceiptNumberRow" style="display:none;">
+                        <span class="detail-label">발급 번호</span>
+                        <span class="detail-value" id="detailReceiptNumber">-</span>
+                    </div>
+                </div>
+
+                <!-- 컨설팅 정보 -->
+                <div class="detail-section">
+                    <h3 class="detail-section-title">컨설팅 정보</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">과정</span>
+                        <span class="detail-value" id="detailCourse">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">금액</span>
+                        <span class="detail-value" id="detailPrice">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">일정</span>
+                        <div class="detail-value" id="detailSchedules">-</div>
+                    </div>
+                </div>
+
+                <!-- 면접 정보 -->
+                <div class="detail-section">
+                    <h3 class="detail-section-title">면접 정보</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">거주 지역</span>
+                        <span class="detail-value" id="detailRegion">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">지원 기업</span>
+                        <span class="detail-value" id="detailCompany">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">지원 직무</span>
+                        <span class="detail-value" id="detailPosition">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">면접일</span>
+                        <span class="detail-value" id="detailInterviewDate">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">면접 절차</span>
+                        <div class="detail-value" id="detailInterviewTypes">-</div>
+                    </div>
+                </div>
+
+                <!-- 기타 정보 -->
+                <div class="detail-section">
+                    <h3 class="detail-section-title">기타 정보</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">컨설팅 방식</span>
+                        <span class="detail-value" id="detailConsultMethod">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">알게된 경로</span>
+                        <div class="detail-value" id="detailReferrals">-</div>
+                    </div>
+                </div>
+
+                <!-- 동의 항목 -->
+                <div class="detail-section">
+                    <h3 class="detail-section-title">동의 항목</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">환불정책 동의</span>
+                        <span class="detail-value" id="detailRefundAgree">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">개인정보 동의</span>
+                        <span class="detail-value" id="detailPrivacyAgree">-</span>
+                    </div>
+                </div>
+
+                <!-- 예약 메타 -->
+                <div class="detail-section">
+                    <h3 class="detail-section-title">예약 정보</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">예약 ID</span>
+                        <span class="detail-value" id="detailReservationId">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">신청일시</span>
+                        <span class="detail-value" id="detailCreatedAt">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">상태</span>
+                        <span class="detail-value" id="detailStatus">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-modal-footer" id="detailModalFooter"></div>
+        </div>
+    </div>
+
+    <!-- 일정 수정 모달 -->
+    <div class="edit-schedule-modal-overlay" id="editScheduleModalOverlay">
+        <div class="edit-schedule-modal" id="editScheduleModal">
+            <div class="edit-schedule-modal-header">
+                <h2>일정 수정</h2>
+                <button class="detail-modal-close" id="editScheduleModalClose">&times;</button>
+            </div>
+            <div class="edit-schedule-modal-body">
+                <p class="edit-schedule-desc">각 회차의 날짜와 시간을 변경할 수 있습니다.</p>
+                <div class="edit-schedule-list" id="editScheduleList"></div>
+            </div>
+            <div class="edit-schedule-modal-footer">
+                <button class="edit-cancel-btn" id="editScheduleCancelBtn">취소</button>
+                <button class="edit-save-btn" id="editScheduleSaveBtn">저장</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 토스트 컨테이너 -->
     <div id="toastContainer"></div>
 

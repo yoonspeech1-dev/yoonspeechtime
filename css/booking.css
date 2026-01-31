@@ -118,14 +118,8 @@
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .step-content h2 {
@@ -147,12 +141,239 @@
     color: var(--primary);
 }
 
-/* ===== 캘린더 카드 ===== */
+/* ===== Step 1: 과정 선택 ===== */
+.course-select-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 20px;
+}
+
+.course-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.course-option {
+    cursor: pointer;
+}
+
+.course-option input {
+    display: none;
+}
+
+.course-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.course-card:hover {
+    border-color: var(--gray-300);
+    background: var(--gray-50);
+}
+
+.course-option input:checked + .course-card {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.course-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.course-option input:checked + .course-card .course-name {
+    color: var(--primary);
+}
+
+.course-sessions {
+    font-size: 14px;
+    color: var(--gray-500);
+    font-weight: 500;
+}
+
+/* 직접입력 횟수 */
+.custom-input-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.custom-input-section label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 10px;
+}
+
+.custom-input-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.qty-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--gray-200);
+    background: var(--white);
+    border-radius: var(--radius);
+    font-size: 20px;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.custom-input-row input {
+    width: 70px;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.custom-input-row input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.qty-unit {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+/* 다음 단계 버튼 */
+.next-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.next-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+    box-shadow: var(--shadow-md);
+}
+
+.next-btn:disabled {
+    background: var(--gray-200);
+    color: var(--gray-400);
+    cursor: not-allowed;
+}
+
+/* ===== Step 2: 일정 선택 ===== */
+.selection-counter {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* 선택한 일정 태그 */
+.selected-schedules {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+}
+
+.selected-schedules h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 12px;
+}
+
+.schedule-tags {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.schedule-tag {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    border: 1px solid rgba(91, 108, 255, 0.2);
+}
+
+.tag-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--white);
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+.tag-info {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.tag-remove {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(91, 108, 255, 0.15);
+    border-radius: 50%;
+    color: var(--primary);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.tag-remove:hover {
+    background: var(--danger);
+    color: white;
+}
+
+/* 캘린더 카드 */
 .booking-calendar-card {
     background: var(--white);
     border-radius: var(--radius-xl);
     padding: 24px;
     box-shadow: var(--shadow-md);
+    margin-bottom: 16px;
 }
 
 .booking-calendar-card .calendar-nav {
@@ -171,23 +392,43 @@
     gap: 20px;
 }
 
-/* ===== 시간 슬롯 ===== */
-.time-slots-card {
+/* 이미 선택된 날짜 표시 */
+.calendar-day.has-selected .day-number {
+    background: var(--success) !important;
+    color: white !important;
+}
+
+.calendar-day.has-selected .day-status {
+    color: var(--success) !important;
+}
+
+/* 시간 선택 카드 */
+.time-select-card {
     background: var(--white);
     border-radius: var(--radius-xl);
-    padding: 24px;
+    padding: 20px 24px;
     box-shadow: var(--shadow-md);
     margin-bottom: 16px;
+}
+
+.time-select-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
 }
 
 .time-slots {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 10px;
 }
 
 .time-slot {
-    padding: 16px 12px;
+    position: relative;
+    padding: 14px 10px;
     text-align: center;
     border: 2px solid var(--gray-200);
     border-radius: var(--radius-lg);
@@ -209,9 +450,9 @@
 
 .time-value {
     display: block;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .time-slot.selected .time-value {
@@ -220,12 +461,68 @@
 
 .time-duration {
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--gray-400);
 }
 
 .time-slot.selected .time-duration {
     color: rgba(255, 255, 255, 0.8);
+}
+
+.time-check {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+}
+
+.time-slot.blocked {
+    border-color: var(--gray-200);
+    background: var(--gray-100);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.time-slot.blocked:hover {
+    border-color: var(--gray-200);
+    background: var(--gray-100);
+}
+
+.time-blocked-label {
+    display: block;
+    font-size: 10px;
+    color: var(--gray-400);
+    font-weight: 500;
+}
+
+.session-guide {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    padding: 8px 0 4px;
+    margin-bottom: 4px;
+}
+
+.time-session-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 1px 8px;
+    border-radius: 10px;
+    margin-bottom: 2px;
+}
+
+/* Step 2 하단 버튼 */
+.step2-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .back-step-btn {
@@ -244,7 +541,46 @@
     color: var(--gray-700);
 }
 
-/* ===== 예약 폼 ===== */
+/* ===== Step 3: 신청서 ===== */
+.schedule-summary {
+    margin-bottom: 20px;
+}
+
+.schedule-summary-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+}
+
+.schedule-summary-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.schedule-summary-row:not(:last-child) {
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.schedule-num {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+.schedule-datetime {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+/* 예약 폼 */
 .booking-form-card {
     background: var(--white);
     border-radius: var(--radius-xl);
@@ -252,77 +588,6 @@
     box-shadow: var(--shadow-md);
 }
 
-.form-section {
-    margin-bottom: 28px;
-}
-
-.form-section:last-child {
-    margin-bottom: 0;
-}
-
-.form-section h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--gray-800);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--gray-100);
-}
-
-/* 과정 선택 */
-.course-options {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.course-option {
-    cursor: pointer;
-}
-
-.course-option input {
-    display: none;
-}
-
-.course-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border: 2px solid var(--gray-200);
-    border-radius: var(--radius-lg);
-    transition: all 0.2s;
-}
-
-.course-option input:checked + .course-card {
-    border-color: var(--primary);
-    background: var(--primary-light);
-}
-
-.course-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.course-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--gray-800);
-}
-
-.course-desc {
-    font-size: 13px;
-    color: var(--gray-500);
-}
-
-.course-price {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-/* 폼 그룹 */
 .form-group {
     margin-bottom: 16px;
 }
@@ -364,54 +629,203 @@
     min-height: 80px;
 }
 
-/* 결제 정보 */
-.payment-info {
-    background: var(--gray-50);
-    border-radius: var(--radius);
-    padding: 16px;
+/* 현금영수증 */
+.receipt-options {
+    display: flex;
+    gap: 16px;
 }
 
-.payment-info p {
-    font-size: 14px;
-    color: var(--gray-600);
-    margin-bottom: 12px;
-}
-
-.account-info {
+.radio-option {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    background: var(--white);
-    border-radius: var(--radius);
-    margin-bottom: 12px;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--gray-700);
 }
 
-.account-info .bank {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--gray-600);
-    padding: 4px 8px;
+.radio-option input[type="radio"] {
+    width: auto;
+    accent-color: var(--primary);
+}
+
+/* 폼 힌트 텍스트 */
+.form-hint {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+/* 현금영수증 번호 입력 + 전화번호 동일 버튼 */
+.receipt-number-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.receipt-number-row input {
+    flex: 1;
+}
+
+.same-phone-btn {
+    white-space: nowrap;
+    padding: 12px 14px;
     background: var(--gray-100);
-    border-radius: 4px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.account-info .account-number {
-    font-size: 16px;
+.same-phone-btn:hover {
+    background: var(--gray-200);
+    color: var(--gray-800);
+}
+
+/* 체크박스 옵션 (다중선택) */
+.checkbox-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--gray-700);
+}
+
+.checkbox-option input[type="checkbox"] {
+    width: auto;
+    accent-color: var(--primary);
+}
+
+/* 라디오 옵션 세로 배치 */
+.radio-options-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+/* 환불정책 박스 */
+.refund-policy-box {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.7;
+}
+
+.refund-policy-box h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+}
+
+.policy-section {
+    margin-bottom: 14px;
+}
+
+.policy-section strong {
+    display: block;
+    font-size: 13px;
     font-weight: 600;
     color: var(--gray-800);
-    letter-spacing: 0.5px;
+    margin-bottom: 6px;
 }
 
-.account-info .account-holder {
-    font-size: 14px;
-    color: var(--gray-500);
+.policy-section ul {
+    list-style: disc;
+    padding-left: 20px;
+    margin: 0;
 }
 
-.payment-info .notice {
+.policy-section ul li {
+    margin-bottom: 4px;
+}
+
+.policy-table-title {
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 12px 0 6px;
+}
+
+.refund-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+    font-size: 12px;
+}
+
+.refund-table th,
+.refund-table td {
+    border: 1px solid var(--gray-200);
+    padding: 6px 10px;
+    text-align: center;
+}
+
+.refund-table th {
+    background: var(--gray-100);
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.refund-table td {
+    color: var(--gray-600);
+}
+
+/* 환불정책 동의 체크박스 */
+.refund-agree {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    border: 1px solid rgba(91, 108, 255, 0.2);
+}
+
+.refund-agree span {
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+/* 개인정보 안내 박스 */
+.privacy-notice-box {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    margin-top: 8px;
+    margin-bottom: 12px;
     font-size: 13px;
-    color: var(--gray-500);
-    margin-bottom: 0;
+    color: var(--gray-600);
+    line-height: 1.7;
+}
+
+.privacy-notice-box p {
+    margin: 0;
+}
+
+.privacy-notice-warn {
+    margin-top: 8px !important;
+    font-size: 12px;
+    color: var(--danger);
+    font-weight: 500;
 }
 
 /* 폼 액션 */
@@ -440,58 +854,140 @@
     box-shadow: var(--shadow-md);
 }
 
-/* ===== 완료 화면 ===== */
-.completion-card {
+/* ===== Step 4: 입금 안내 ===== */
+.payment-card {
     background: var(--white);
     border-radius: var(--radius-xl);
     padding: 32px 24px;
     box-shadow: var(--shadow-md);
+}
+
+.payment-completion-msg {
     text-align: center;
+    margin-bottom: 28px;
 }
 
-.completion-icon {
-    width: 64px;
-    height: 64px;
-    background: var(--success);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    margin: 0 auto 20px;
+.completion-main {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+    line-height: 1.8;
+    margin: 0;
 }
 
-.completion-card h2 {
-    margin-bottom: 8px;
+.completion-main strong {
+    color: var(--primary);
 }
 
-.completion-desc {
-    color: var(--gray-500);
-    margin-bottom: 24px;
+.completion-warning {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--danger);
+    margin-top: 16px;
 }
 
-.booking-summary {
-    text-align: left;
+/* 계좌 정보 박스 */
+.payment-account-box {
     background: var(--gray-50);
     border-radius: var(--radius-lg);
     padding: 20px;
     margin-bottom: 24px;
 }
 
-.booking-summary h3 {
+.account-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.account-row:not(:last-child) {
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.account-row.highlight {
+    border-bottom: none;
+    padding-top: 14px;
+    margin-top: 4px;
+    border-top: 2px solid var(--gray-200);
+}
+
+.account-label {
+    font-size: 14px;
+    color: var(--gray-500);
+    font-weight: 500;
+}
+
+.account-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.account-value.price {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.copy-account-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.copy-account-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* 안내 문구 */
+.payment-notice {
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.payment-notice p {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.7;
+    margin: 0;
+}
+
+.payment-notice p + p {
+    margin-top: 8px;
+}
+
+.payment-notice strong {
+    color: var(--primary);
+}
+
+/* 예약 내역 요약 */
+.booking-summary-section {
+    border-top: 1px solid var(--gray-200);
+    padding-top: 20px;
+}
+
+.booking-summary-section h3 {
     font-size: 14px;
     font-weight: 600;
     color: var(--gray-600);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 12px;
 }
 
 .summary-item {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: 6px 0;
     font-size: 14px;
 }
 
@@ -502,65 +998,6 @@
 .summary-value {
     font-weight: 500;
     color: var(--gray-800);
-}
-
-.summary-item.highlight {
-    margin-top: 8px;
-    padding-top: 12px;
-    border-top: 1px solid var(--gray-200);
-}
-
-.summary-item.highlight .summary-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.payment-reminder {
-    background: var(--primary-light);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: 24px;
-}
-
-.payment-reminder h4 {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--primary-dark);
-    margin-bottom: 12px;
-}
-
-.payment-reminder .account-info.large {
-    background: var(--white);
-    padding: 16px;
-    margin-bottom: 12px;
-}
-
-.payment-reminder .account-info.large .account-number {
-    font-size: 18px;
-}
-
-.payment-reminder p {
-    font-size: 13px;
-    color: var(--primary-dark);
-    margin: 0;
-}
-
-.new-booking-btn {
-    width: 100%;
-    padding: 14px;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.new-booking-btn:hover {
-    background: var(--gray-200);
 }
 
 /* ===== 푸터 ===== */
@@ -600,17 +1037,15 @@
         width: 20px;
     }
 
+    .course-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     .time-slots {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .account-info {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .account-info .account-number {
-        width: 100%;
-        order: 3;
+    .account-value.price {
+        font-size: 18px;
     }
 }
