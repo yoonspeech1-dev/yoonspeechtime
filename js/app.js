@@ -81,27 +81,62 @@ function generateUniqueId() {
     return Math.random().toString(36).substring(2, 8);
 }
 
-// ===== 설정 저장/불러오기 (localStorage) =====
-function saveToLocalStorage() {
-    const data = {
-        settings: state.settings,
-        timeBlocks: state.timeBlocks,
-        reservations: state.reservations
-    };
-    localStorage.setItem('yoonspeech_data', JSON.stringify(data));
+// ===== 서버 데이터 로드/저장 =====
+async function loadFromServer() {
+    try {
+        const res = await fetch('/api/get-data');
+        if (!res.ok) throw new Error('서버 응답 오류');
+        const data = await res.json();
+        if (data.settings) state.settings = data.settings;
+        if (data.timeBlocks) state.timeBlocks = data.timeBlocks;
+        if (data.reservations) state.reservations = data.reservations;
+    } catch (e) {
+        console.error('서버 데이터 로드 실패:', e);
+        showToast('데이터를 불러오는데 실패했습니다');
+    }
 }
 
-function loadFromLocalStorage() {
-    const saved = localStorage.getItem('yoonspeech_data');
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            if (data.settings) state.settings = data.settings;
-            if (data.timeBlocks) state.timeBlocks = data.timeBlocks;
-            if (data.reservations) state.reservations = data.reservations;
-        } catch (e) {
-            console.error('데이터 로드 실패:', e);
-        }
+async function saveSettingsToServer() {
+    try {
+        const res = await fetch('/api/save-settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: state.settings }),
+        });
+        if (!res.ok) throw new Error('저장 실패');
+    } catch (e) {
+        console.error('설정 저장 실패:', e);
+        showToast('설정 저장에 실패했습니다');
+    }
+}
+
+async function saveTimeBlocksToServer() {
+    try {
+        const res = await fetch('/api/save-time-blocks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ timeBlocks: state.timeBlocks }),
+        });
+        if (!res.ok) throw new Error('저장 실패');
+    } catch (e) {
+        console.error('타임블록 저장 실패:', e);
+        showToast('타임블록 저장에 실패했습니다');
+    }
+}
+
+async function updateReservationOnServer(action, reservationId, schedules) {
+    try {
+        const res = await fetch('/api/update-reservation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action, reservationId, schedules }),
+        });
+        if (!res.ok) throw new Error('업데이트 실패');
+        const data = await res.json();
+        if (data.timeBlocks) state.timeBlocks = data.timeBlocks;
+    } catch (e) {
+        console.error('예약 업데이트 실패:', e);
+        showToast('예약 업데이트에 실패했습니다');
     }
 }
 
@@ -474,7 +509,7 @@ function handleDragEnd() {
     resetDragState();
     renderTimeBlocks();
     renderCalendar();
-    saveToLocalStorage();
+    saveTimeBlocksToServer();
 
     if (count > 0) {
         showToast(`${count}개 시간이 ${action}으로 변경되었습니다`);
@@ -524,7 +559,7 @@ function handleTimeBlockClick(time) {
 
     renderTimeBlocks();
     renderCalendar();
-    saveToLocalStorage();
+    saveTimeBlocksToServer();
     showToast(`${time} 시간이 변경되었습니다`);
 }
 
@@ -554,7 +589,7 @@ function bulkOpenTimeBlocks() {
 
     renderTimeBlocks();
     renderCalendar();
-    saveToLocalStorage();
+    saveTimeBlocksToServer();
     showToast(`${targetDates.length}개 날짜에 시간이 열렸습니다`);
 }
 
@@ -583,7 +618,7 @@ function closeAllTimeBlocks() {
 
     renderTimeBlocks();
     renderCalendar();
-    saveToLocalStorage();
+    saveTimeBlocksToServer();
     showToast('마감 설정되었습니다');
 }
 
@@ -612,7 +647,7 @@ function openAllTimeBlocks() {
 
     renderTimeBlocks();
     renderCalendar();
-    saveToLocalStorage();
+    saveTimeBlocksToServer();
     showToast('마감 해제되었습니다');
 }
 
@@ -647,8 +682,8 @@ function saveSettings() {
     document.getElementById('startTime').value = startTime;
     document.getElementById('endTime').value = endTime;
 
-    // localStorage 저장
-    saveToLocalStorage();
+    // 서버 저장
+    saveSettingsToServer();
 
     // 현재 타임 블록 다시 렌더링
     if (state.selectedDate) {
@@ -911,25 +946,24 @@ function getBlockedSlots(bookedTime) {
 }
 
 // 예약 확정
-function confirmReservation(reservationId) {
+async function confirmReservation(reservationId) {
     const reservation = state.reservations.find(r => r.id === reservationId);
     if (reservation) {
         reservation.status = 'confirmed';
 
-        // 해당 타임 블록들을 예약 완료로 변경 (2시간 블록 적용)
+        // 해당 타임 블록들을 예약 완료로 변경 (2시간 블록 적용) - 로컬 상태도 업데이트
         const schedules = reservation.schedules || reservation.dates || [];
         schedules.forEach(({ date, time }) => {
             if (!state.timeBlocks[date]) {
                 state.timeBlocks[date] = {};
             }
-            // 예약 시간 + 이후 120분 이내 슬롯 모두 booked 처리
             const blockedSlots = getBlockedSlots(time);
             blockedSlots.forEach(slot => {
                 state.timeBlocks[date][slot] = 'booked';
             });
         });
 
-        saveToLocalStorage();
+        await updateReservationOnServer('confirm', reservationId);
         renderReservations();
         renderCalendar();
         renderTimeBlocks();
@@ -938,28 +972,24 @@ function confirmReservation(reservationId) {
         showToast(`${name}님의 예약이 확정되었습니다`);
 
         // 문자 발송 (부가 기능 - 실패해도 예약 확정은 유지)
-        const phone = reservation.customerPhone || reservation.phone || '';
-        const courseName = reservation.courseName || reservation.course || '';
-        if (phone) {
-            sendConfirmationSMS({
-                to: phone,
-                customerName: name,
-                courseName: courseName,
-                schedules: schedules,
-            });
-        }
+        sendConfirmationSMS(reservation);
     }
 }
 
-async function sendConfirmationSMS(payload) {
+async function sendConfirmationSMS(reservation) {
     try {
         const res = await fetch('/api/send-sms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ reservation }),
         });
+        const data = await res.json();
         if (res.ok) {
-            showToast('문자가 발송되었습니다');
+            if (data.errors && data.errors.length > 0) {
+                showToast('일부 문자 발송에 실패했습니다');
+            } else {
+                showToast('문자가 발송되었습니다 (고객/관리자/직원)');
+            }
         } else {
             showToast('예약은 확정되었으나 문자 발송에 실패했습니다');
         }
@@ -1085,14 +1115,14 @@ function closeReservationDetail() {
 }
 
 // ===== 예약 삭제 =====
-function deleteReservation(reservationId) {
+async function deleteReservation(reservationId) {
     const reservation = state.reservations.find(r => r.id === reservationId);
     if (!reservation) return;
 
     const name = reservation.customerName || reservation.name || '';
     if (!confirm(`${name}님의 예약을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
 
-    // 해당 예약의 booked 슬롯을 available로 복원
+    // 해당 예약의 booked 슬롯을 available로 복원 (로컬 상태)
     const schedules = reservation.schedules || reservation.dates || [];
     schedules.forEach(({ date, time }) => {
         if (state.timeBlocks[date]) {
@@ -1108,7 +1138,7 @@ function deleteReservation(reservationId) {
     // reservations에서 제거
     state.reservations = state.reservations.filter(r => r.id !== reservationId);
 
-    saveToLocalStorage();
+    await updateReservationOnServer('delete', reservationId);
     renderReservations();
     renderCalendar();
     renderTimeBlocks();
@@ -1188,7 +1218,7 @@ function renderEditTimeOptions(dateStr, selectEl, currentTime, reservationId) {
     }
 }
 
-function saveEditedSchedules() {
+async function saveEditedSchedules() {
     const reservationId = document.getElementById('editScheduleModal').dataset.reservationId;
     const reservation = state.reservations.find(r => r.id === reservationId);
     if (!reservation) return;
@@ -1237,7 +1267,7 @@ function saveEditedSchedules() {
     // schedules 업데이트
     reservation.schedules = newSchedules;
 
-    saveToLocalStorage();
+    await updateReservationOnServer('edit_schedules', reservationId, newSchedules);
     renderReservations();
     renderCalendar();
     renderTimeBlocks();
@@ -1257,12 +1287,12 @@ window.saveEditedSchedules = saveEditedSchedules;
 window.closeEditScheduleModal = closeEditScheduleModal;
 
 // ===== 초기화 =====
-function init() {
-    // localStorage에서 데이터 불러오기
-    loadFromLocalStorage();
+async function init() {
+    // 로딩 표시
+    document.body.classList.add('loading');
 
-    // 예약, 타임블록 데이터 초기화 (빈 상태로 시작)
-    // 기본값은 모두 잠금 상태 (timeBlocks가 비어있으면 unavailable로 표시)
+    // 서버에서 데이터 불러오기
+    await loadFromServer();
 
     setupTabs();
     setupEventListeners();
@@ -1272,6 +1302,9 @@ function init() {
 
     renderCalendar();
     renderReservations();
+
+    // 로딩 해제
+    document.body.classList.remove('loading');
 }
 
 document.addEventListener('DOMContentLoaded', init);

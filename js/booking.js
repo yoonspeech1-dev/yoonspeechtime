@@ -87,17 +87,16 @@ function getCourseName() {
 }
 
 // ===== 데이터 로드/저장 =====
-function loadAdminData() {
-    const saved = localStorage.getItem('yoonspeech_data');
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            if (data.settings) bookingState.settings = data.settings;
-            if (data.timeBlocks) bookingState.timeBlocks = data.timeBlocks;
-            if (data.reservations) bookingState.reservations = data.reservations;
-        } catch (e) {
-            console.error('데이터 로드 실패:', e);
-        }
+async function loadAdminData() {
+    try {
+        const res = await fetch('/api/get-booking-data');
+        if (!res.ok) throw new Error('서버 응답 오류');
+        const data = await res.json();
+        if (data.settings) bookingState.settings = data.settings;
+        if (data.timeBlocks) bookingState.timeBlocks = data.timeBlocks;
+    } catch (e) {
+        console.error('데이터 로드 실패:', e);
+        showToast('데이터를 불러오는데 실패했습니다');
     }
 }
 
@@ -117,29 +116,21 @@ function getBookingBlockedSlots(bookedTime) {
     return slots;
 }
 
-function saveReservation(reservation) {
-    const saved = localStorage.getItem('yoonspeech_data');
-    let data = {};
-    if (saved) {
-        try { data = JSON.parse(saved); } catch (e) {}
-    }
-
-    if (!data.reservations) data.reservations = [];
-    data.reservations.push(reservation);
-
-    // 선택한 시간들을 booked로 변경 (2시간 블록 적용)
-    if (!data.timeBlocks) data.timeBlocks = {};
-    reservation.schedules.forEach(schedule => {
-        if (!data.timeBlocks[schedule.date]) data.timeBlocks[schedule.date] = {};
-        const blockedSlots = getBookingBlockedSlots(schedule.time);
-        blockedSlots.forEach(slot => {
-            data.timeBlocks[schedule.date][slot] = 'booked';
+async function saveReservation(reservation) {
+    try {
+        const res = await fetch('/api/create-reservation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reservation }),
         });
-    });
-
-    localStorage.setItem('yoonspeech_data', JSON.stringify(data));
-    bookingState.timeBlocks = data.timeBlocks;
-    bookingState.reservations = data.reservations;
+        if (!res.ok) throw new Error('예약 저장 실패');
+        const data = await res.json();
+        if (data.timeBlocks) bookingState.timeBlocks = data.timeBlocks;
+    } catch (e) {
+        console.error('예약 저장 실패:', e);
+        showToast('예약 저장에 실패했습니다. 다시 시도해주세요.');
+        throw e;
+    }
 }
 
 // ===== 예약 가능 여부 =====
@@ -572,7 +563,7 @@ function initStep3() {
     document.getElementById('bookingForm').addEventListener('submit', handleSubmit);
 }
 
-function handleSubmit(e) {
+async function handleSubmit(e) {
     e.preventDefault();
 
     const form = e.target;
@@ -687,7 +678,11 @@ function handleSubmit(e) {
     };
 
     // 저장
-    saveReservation(reservation);
+    try {
+        await saveReservation(reservation);
+    } catch (e) {
+        return; // 저장 실패 시 중단
+    }
 
     // Step 4로 이동
     showStep4(reservation);
@@ -760,11 +755,18 @@ function goToStep(step) {
 }
 
 // ===== 초기화 =====
-function init() {
-    loadAdminData();
+async function init() {
+    // 로딩 표시
+    document.body.classList.add('loading');
+
+    await loadAdminData();
+
     initStep1();
     initStep2();
     initStep3();
+
+    // 로딩 해제
+    document.body.classList.remove('loading');
 }
 
 document.addEventListener('DOMContentLoaded', init);
