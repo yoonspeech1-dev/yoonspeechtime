@@ -328,13 +328,16 @@ function renderCalendar() {
         calendarDays.appendChild(el);
     }
 
-    // 다음 달 빈 칸
-    const remaining = 42 - (startingDay + totalDays);
-    for (let i = 1; i <= remaining; i++) {
-        const el = document.createElement('div');
-        el.className = 'calendar-day empty disabled';
-        el.innerHTML = `<span class="day-number">${i}</span>`;
-        calendarDays.appendChild(el);
+    // 다음 달 빈 칸 (현재 주만 채움)
+    const totalCells = startingDay + totalDays;
+    const remainInRow = totalCells % 7;
+    if (remainInRow > 0) {
+        for (let i = 1; i <= 7 - remainInRow; i++) {
+            const el = document.createElement('div');
+            el.className = 'calendar-day empty disabled';
+            el.innerHTML = `<span class="day-number">${i}</span>`;
+            calendarDays.appendChild(el);
+        }
     }
 }
 
@@ -367,6 +370,11 @@ function getNextSessionNumber() {
     return bookingState.selectedSchedules.length + 1;
 }
 
+// 해당 날짜에 이미 선택된 시간이 있는지 확인
+function hasSelectionOnDate(dateStr) {
+    return bookingState.selectedSchedules.some(s => s.date === dateStr);
+}
+
 function renderTimeSlots(dateStr) {
     const container = document.getElementById('timeSlots');
     const availableSlots = getAvailableTimeSlots(dateStr);
@@ -377,6 +385,9 @@ function renderTimeSlots(dateStr) {
         return;
     }
 
+    // 이 날짜에 이미 선택된 시간이 있는지 확인 (하루 1타임 제한)
+    const dateHasSelection = hasSelectionOnDate(dateStr);
+
     // 현재 선택 중인 회차 안내
     const sessionGuide = nextSession <= bookingState.totalSessions
         ? `<div class="session-guide">${nextSession}회차 시간을 선택해주세요</div>`
@@ -384,15 +395,16 @@ function renderTimeSlots(dateStr) {
 
     container.innerHTML = sessionGuide + availableSlots.map(time => {
         const selected = isTimeSelected(dateStr, time);
-        const blocked = !selected && isTimeBlockedBySelection(dateStr, time);
+        const blocked = !selected && (isTimeBlockedBySelection(dateStr, time) || (dateHasSelection && !selected));
         const sessionNum = selected ? getSessionNumberForSlot(dateStr, time) : null;
+        const blockedLabel = !selected && dateHasSelection ? '하루 1타임' : (blocked ? '선택 불가' : '');
         return `
             <div class="time-slot ${selected ? 'selected' : ''} ${blocked ? 'blocked' : ''}" data-date="${dateStr}" data-time="${time}">
                 ${selected && sessionNum ? `<span class="time-session-badge">${sessionNum}회차</span>` : ''}
                 <span class="time-value">${time}</span>
                 <span class="time-duration">90분</span>
                 ${selected ? '<span class="time-check">✓</span>' : ''}
-                ${blocked ? '<span class="time-blocked-label">선택 불가</span>' : ''}
+                ${blocked ? `<span class="time-blocked-label">${blockedLabel}</span>` : ''}
             </div>
         `;
     }).join('');
@@ -420,10 +432,19 @@ function toggleTimeSlot(date, time) {
     }
 
     // UI 업데이트
-    renderTimeSlots(date);
     renderCalendar();
     updateSelectedSchedulesUI();
     updateStep2Button();
+
+    // 시간 슬롯 UI 업데이트
+    renderTimeSlots(date);
+
+    // 새로 선택한 경우: 다음 회차 안내 토스트 표시 (타임박스는 유지)
+    const remaining = bookingState.totalSessions - bookingState.selectedSchedules.length;
+    if (idx === -1 && remaining > 0) {
+        const nextSession = bookingState.selectedSchedules.length + 1;
+        showToast(`다음 ${nextSession}회차 날짜 및 시간을 캘린더에서 선택해주세요`);
+    }
 }
 
 function updateSelectedSchedulesUI() {
@@ -475,11 +496,13 @@ function updateStep2Button() {
 
 function initStep2() {
     document.getElementById('prevMonth').addEventListener('click', () => {
+        bookingState.currentDate.setDate(1);
         bookingState.currentDate.setMonth(bookingState.currentDate.getMonth() - 1);
         renderCalendar();
     });
 
     document.getElementById('nextMonth').addEventListener('click', () => {
+        bookingState.currentDate.setDate(1);
         bookingState.currentDate.setMonth(bookingState.currentDate.getMonth() + 1);
         renderCalendar();
     });
@@ -684,6 +707,17 @@ async function handleSubmit(e) {
         return; // 저장 실패 시 중단
     }
 
+    // 관리자 알림 전송 (실패해도 예약 진행에 영향 없음)
+    try {
+        await fetch('/api/notify-booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reservation })
+        });
+    } catch (e) {
+        console.error('관리자 알림 전송 실패:', e);
+    }
+
     // Step 4로 이동
     showStep4(reservation);
 }
@@ -726,6 +760,16 @@ function showStep4(reservation) {
 // ===== 스텝 관리 =====
 function goToStep(step) {
     bookingState.currentStep = step;
+
+    // 헤더 compact 토글 (2단계 이후 compact)
+    const header = document.getElementById('bookingHeader');
+    if (header) {
+        if (step >= 2) {
+            header.classList.add('compact');
+        } else {
+            header.classList.remove('compact');
+        }
+    }
 
     // 모든 스텝 숨기기
     document.querySelectorAll('.booking-step').forEach(s => s.style.display = 'none');
