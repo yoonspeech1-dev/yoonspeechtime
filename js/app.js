@@ -875,6 +875,11 @@ function renderReservations(filter = 'all', searchTerm = '') {
         });
     }
 
+    // 최신 신청자가 위에 오도록 정렬
+    filteredReservations.sort((a, b) => {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+
     // 입금대기 개수 업데이트
     const pendingCount = state.reservations.filter(r => r.status === 'pending').length;
     const badge = document.getElementById('pendingBadge');
@@ -917,7 +922,7 @@ function renderReservations(filter = 'all', searchTerm = '') {
                     ${reservation.status === 'pending' ? `
                         <button class="confirm-btn" onclick="event.stopPropagation(); confirmReservation('${reservation.id}')">예약 확정</button>
                     ` : ''}
-                    <button class="email-btn" onclick="event.stopPropagation(); sendConfirmationEmail('${reservation.id}')">메일발송</button>
+                    <button class="email-btn${reservation.emailSent ? ' email-sent' : ''}" data-reservation-id="${reservation.id}" onclick="event.stopPropagation(); sendConfirmationEmail('${reservation.id}')" ${reservation.emailSent ? 'disabled' : ''}>${reservation.emailSent ? '발송 완료' : '메일발송'}</button>
                 </div>
             </div>
         `;
@@ -1006,13 +1011,28 @@ async function sendConfirmationEmail(reservationId) {
     const reservation = state.reservations.find(r => r.id === reservationId);
     if (!reservation) return;
 
+    // 이미 발송 완료된 경우 차단
+    if (reservation.emailSent) {
+        showToast('이미 이메일이 발송되었습니다');
+        return;
+    }
+
     if (!reservation.customerEmail) {
         showToast('고객 이메일이 등록되어 있지 않습니다');
         return;
     }
 
+    // 모든 관련 버튼 찾기
+    function getButtons() {
+        const list = document.querySelectorAll(`.email-btn[data-reservation-id="${reservationId}"]`);
+        const detail = document.getElementById('detailEmailBtn');
+        const btns = [...list];
+        if (detail) btns.push(detail);
+        return btns;
+    }
+
     // 발송 중 상태로 버튼 변경
-    const btns = document.querySelectorAll(`.email-btn[onclick*="'${reservationId}'"], #detailEmailBtn`);
+    const btns = getButtons();
     btns.forEach(btn => {
         btn.textContent = '발송중...';
         btn.disabled = true;
@@ -1025,16 +1045,21 @@ async function sendConfirmationEmail(reservationId) {
             body: JSON.stringify({ reservation }),
         });
         const data = await res.json();
+        const currentBtns = getButtons();
         if (res.ok) {
+            // 서버에 발송 완료 상태 저장
+            reservation.emailSent = true;
+            await updateReservationOnServer('mark_email_sent', reservationId);
             showToast('안내 이메일이 발송되었습니다');
-            btns.forEach(btn => {
+            currentBtns.forEach(btn => {
                 btn.textContent = '발송 완료';
                 btn.classList.add('email-sent');
                 btn.classList.remove('email-failed');
+                btn.disabled = true;
             });
         } else {
             showToast('이메일 발송에 실패했습니다');
-            btns.forEach(btn => {
+            currentBtns.forEach(btn => {
                 btn.textContent = '발송 실패';
                 btn.classList.add('email-failed');
                 btn.classList.remove('email-sent');
@@ -1044,7 +1069,8 @@ async function sendConfirmationEmail(reservationId) {
     } catch (e) {
         console.error('이메일 발송 요청 실패:', e);
         showToast('이메일 발송에 실패했습니다');
-        btns.forEach(btn => {
+        const currentBtns = getButtons();
+        currentBtns.forEach(btn => {
             btn.textContent = '발송 실패';
             btn.classList.add('email-failed');
             btn.classList.remove('email-sent');
@@ -1154,8 +1180,14 @@ function showReservationDetail(reservationId) {
             </div>`;
     }
 
-    // 메일발송 버튼 이벤트
-    document.getElementById('detailEmailBtn').addEventListener('click', () => {
+    // 메일발송 버튼: 이미 발송 완료된 경우 상태 반영
+    const detailEmailBtn = document.getElementById('detailEmailBtn');
+    if (reservation.emailSent) {
+        detailEmailBtn.textContent = '발송 완료';
+        detailEmailBtn.classList.add('email-sent');
+        detailEmailBtn.disabled = true;
+    }
+    detailEmailBtn.addEventListener('click', () => {
         sendConfirmationEmail(reservation.id);
     });
 
