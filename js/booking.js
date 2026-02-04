@@ -311,8 +311,8 @@ function renderCalendar() {
             el.classList.add('selected');
         }
 
-        if (currentDate.getTime() === today.getTime()) {
-            // 다른 날짜가 선택된 상태면 테두리만, 아니면 보라 배경
+        const isToday = currentDate.getTime() === today.getTime();
+        if (isToday) {
             if (bookingState.viewingDate && bookingState.viewingDate !== dateStr) {
                 el.classList.add('today-outline');
             } else {
@@ -320,9 +320,13 @@ function renderCalendar() {
             }
         }
 
+        const todayLabel = isToday && el.classList.contains('today-outline')
+            ? '<span class="today-label">오늘</span>'
+            : '';
+
         el.innerHTML = `
             <span class="day-number">${day}</span>
-            ${statusHtml}
+            ${todayLabel || statusHtml}
         `;
 
         if (!isPast && isOperating && hasAvailable) {
