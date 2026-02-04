@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>윤스피치 - 1:1 컨설팅 예약</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/booking.css">
 </head>
 <body class="booking-page">
     <div class="booking-app">
-        <!-- 헤더 -->
-        <header class="booking-header">
+        <!-- 상단 레이아웃: 로고 / 스텝 / 안내문구 -->
+        <div class="booking-top-area flex flex-col items-center justify-center gap-8" id="bookingHeader">
+            <!-- 로고 -->
             <div class="booking-logo">
                 <span class="logo">Y</span>
                 <div class="logo-text">
@@ -18,12 +20,10 @@
                     <p>1:1 면접 컨설팅</p>
                 </div>
             </div>
-        </header>
+            <h1 class="booking-compact-title">한판면접 프리미엄 1:1 컨설팅 예약</h1>
 
-        <!-- 메인 컨텐츠 -->
-        <main class="booking-main">
             <!-- 스텝 인디케이터 -->
-            <div class="step-indicator">
+            <div class="step-indicator w-full flex justify-center">
                 <div class="step active" data-step="1">
                     <span class="step-number">1</span>
                     <span class="step-label">과정 선택</span>
@@ -45,11 +45,18 @@
                 </div>
             </div>
 
+            <!-- 안내문구 -->
+            <div class="text-center">
+                <h2 class="step-content-title">컨설팅 과정을 선택해주세요</h2>
+                <p class="step-desc">원하시는 컨설팅 과정을 선택하세요</p>
+            </div>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="booking-main">
             <!-- Step 1: 과정 선택 -->
             <section class="booking-step" id="step1">
                 <div class="step-content">
-                    <h2>컨설팅 과정을 선택해주세요</h2>
-                    <p class="step-desc">원하시는 컨설팅 과정을 선택하세요</p>
 
                     <div class="course-select-card">
                         <div class="course-options" id="courseOptions">

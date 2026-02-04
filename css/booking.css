@@ -14,10 +14,10 @@
     flex-direction: column;
 }
 
-/* ===== 헤더 ===== */
-.booking-header {
-    text-align: center;
-    padding: 16px 0 8px;
+/* ===== 상단 영역 (Tailwind flex 보조) ===== */
+.booking-top-area {
+    /* flex flex-col items-center justify-center gap-8 은 Tailwind 클래스로 처리 */
+    padding-top: 16px;
 }
 
 .booking-logo {
@@ -45,16 +45,25 @@
     color: var(--gray-500);
 }
 
-/* 2단계 이후 compact 헤더 */
-.booking-header.compact {
-    padding: 12px 0 4px;
+/* 2단계 이후 compact 모드 */
+.booking-top-area.compact {
+    padding-top: 8px;
+    gap: 0 !important;
 }
 
-.booking-header.compact .booking-logo {
+.booking-top-area.compact .booking-logo {
     display: none;
 }
 
-.booking-header.compact .booking-compact-title {
+.booking-top-area.compact .step-indicator {
+    display: none;
+}
+
+.booking-top-area.compact .text-center {
+    display: none;
+}
+
+.booking-top-area.compact .booking-compact-title {
     display: block;
     font-size: 18px;
     font-weight: 800;
@@ -66,13 +75,19 @@
     display: none;
 }
 
+/* 안내문구 (top-area 내) */
+.step-content-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
 /* ===== 스텝 인디케이터 ===== */
 .step-indicator {
-    display: flex;
+    /* w-full flex justify-center 는 Tailwind 클래스로 처리 */
     align-items: center;
-    justify-content: center;
-    padding: 6px 0 12px;
     gap: 8px;
+    padding: 0;
 }
 
 .step {
@@ -126,7 +141,7 @@
     width: 30px;
     height: 2px;
     background: var(--gray-200);
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 /* ===== 메인 컨텐츠 ===== */
@@ -155,6 +170,11 @@
     text-align: center;
     font-size: 14px;
     color: var(--gray-500);
+    margin-bottom: 0;
+}
+
+/* step-content 내부에서는 margin-bottom 유지 */
+.step-content .step-desc {
     margin-bottom: 12px;
 }
 
@@ -1047,19 +1067,6 @@
         flex-direction: column;
     }
 
-    .booking-step {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .booking-step .step-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
     .booking-footer {
         padding: 6px 0;
     }
@@ -1068,9 +1075,9 @@
         font-size: 11px;
     }
 
-    /* ── 헤더 ── */
-    .booking-header {
-        padding: 12px 0 0;
+    /* ── 상단 영역 ── */
+    .booking-top-area {
+        padding-top: 12px;
     }
 
     .booking-logo .logo {
@@ -1087,13 +1094,16 @@
         font-size: 12px;
     }
 
-    .booking-header.compact {
-        padding: 8px 0 0;
+    .booking-top-area.compact {
+        padding-top: 8px;
+    }
+
+    .step-content-title {
+        font-size: 19px;
     }
 
     /* ── 스텝 인디케이터 ── */
     .step-indicator {
-        padding: 12px 0;
         gap: 6px;
     }
 
