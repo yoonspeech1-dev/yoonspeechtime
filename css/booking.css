@@ -1045,6 +1045,18 @@
         flex: 1;
         display: flex;
         flex-direction: column;
+    }
+
+    .booking-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .booking-step .step-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
         justify-content: center;
     }
 
@@ -1058,7 +1070,7 @@
 
     /* ── 헤더 ── */
     .booking-header {
-        padding: 12px 0 4px;
+        padding: 12px 0 0;
     }
 
     .booking-logo .logo {
@@ -1081,7 +1093,7 @@
 
     /* ── 스텝 인디케이터 ── */
     .step-indicator {
-        padding: 8px 0 10px;
+        padding: 12px 0;
         gap: 6px;
     }
 
