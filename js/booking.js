@@ -580,9 +580,11 @@ function initStep3() {
         });
     });
 
-    // 윤쌤 알게된 경로 - 기타 직접입력 토글
+    // 윤쌤 알게된 경로 - 지인소개/기타 직접입력 토글
     document.querySelectorAll('input[name="referral"]').forEach(cb => {
         cb.addEventListener('change', () => {
+            const friendChecked = document.querySelector('input[name="referral"][value="지인소개"]').checked;
+            document.getElementById('referralFriendGroup').style.display = friendChecked ? 'block' : 'none';
             const etcChecked = document.querySelector('input[name="referral"][value="기타"]').checked;
             document.getElementById('referralEtcGroup').style.display = etcChecked ? 'block' : 'none';
         });
@@ -623,6 +625,11 @@ async function handleSubmit(e) {
 
     // 알게된 경로 (다중선택)
     const referrals = [...document.querySelectorAll('input[name="referral"]:checked')].map(cb => cb.value);
+    const referralFriend = form.referralFriend ? form.referralFriend.value.trim() : '';
+    if (referrals.includes('지인소개') && referralFriend) {
+        const idx = referrals.indexOf('지인소개');
+        referrals[idx] = `지인소개 (추천인: ${referralFriend})`;
+    }
     const referralEtc = form.referralEtc ? form.referralEtc.value.trim() : '';
     if (referrals.includes('기타') && referralEtc) {
         const idx = referrals.indexOf('기타');
