@@ -312,7 +312,12 @@ function renderCalendar() {
         }
 
         if (currentDate.getTime() === today.getTime()) {
-            el.classList.add('today');
+            // 다른 날짜가 선택된 상태면 테두리만, 아니면 보라 배경
+            if (bookingState.viewingDate && bookingState.viewingDate !== dateStr) {
+                el.classList.add('today-outline');
+            } else {
+                el.classList.add('today');
+            }
         }
 
         el.innerHTML = `

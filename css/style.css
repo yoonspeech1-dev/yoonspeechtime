@@ -410,6 +410,13 @@ body {
     color: var(--white);
 }
 
+/* 다른 날짜 선택 시 오늘은 테두리만 */
+.calendar-day.today-outline .day-number {
+    background: var(--white) !important;
+    color: var(--primary) !important;
+    border: 2px solid var(--primary);
+}
+
 /* 선택된 날짜 */
 .calendar-day.selected .day-number {
     background: var(--primary);
