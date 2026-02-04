@@ -749,6 +749,24 @@
     accent-color: var(--primary);
 }
 
+/* 체크박스 하위 입력칸 (지인소개 추천인 등) */
+.referral-sub-input {
+    padding-left: 26px;
+}
+
+.referral-sub-input input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 14px;
+}
+
+.referral-sub-input input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
 /* 라디오 옵션 세로 배치 */
 .radio-options-vertical {
     display: flex;
