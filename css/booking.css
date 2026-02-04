@@ -8,7 +8,7 @@
 .booking-app {
     max-width: 600px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 12px 16px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -17,7 +17,7 @@
 /* ===== 헤더 ===== */
 .booking-header {
     text-align: center;
-    padding: 30px 0;
+    padding: 16px 0 8px;
 }
 
 .booking-logo {
@@ -45,12 +45,33 @@
     color: var(--gray-500);
 }
 
+/* 2단계 이후 compact 헤더 */
+.booking-header.compact {
+    padding: 12px 0 4px;
+}
+
+.booking-header.compact .booking-logo {
+    display: none;
+}
+
+.booking-header.compact .booking-compact-title {
+    display: block;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--gray-800);
+    letter-spacing: -0.3px;
+}
+
+.booking-compact-title {
+    display: none;
+}
+
 /* ===== 스텝 인디케이터 ===== */
 .step-indicator {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px 0 30px;
+    padding: 6px 0 12px;
     gap: 8px;
 }
 
@@ -127,14 +148,14 @@
     font-size: 20px;
     font-weight: 700;
     color: var(--gray-800);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .step-desc {
     text-align: center;
     font-size: 14px;
     color: var(--gray-500);
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 }
 
 .step-desc strong {
@@ -145,15 +166,15 @@
 .course-select-card {
     background: var(--white);
     border-radius: var(--radius-xl);
-    padding: 24px;
+    padding: 16px;
     box-shadow: var(--shadow-md);
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .course-options {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 10px;
 }
 
 .course-option {
@@ -169,8 +190,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 24px 16px;
+    gap: 6px;
+    padding: 28px 16px;
     border: 2px solid var(--gray-200);
     border-radius: var(--radius-lg);
     transition: all 0.2s;
@@ -188,7 +209,7 @@
 }
 
 .course-name {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--gray-800);
 }
@@ -198,7 +219,7 @@
 }
 
 .course-sessions {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--gray-500);
     font-weight: 500;
 }
@@ -371,25 +392,25 @@
 .booking-calendar-card {
     background: var(--white);
     border-radius: var(--radius-xl);
-    padding: 24px;
+    padding: 16px;
     box-shadow: var(--shadow-md);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .booking-calendar-card .calendar-nav {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .date-display {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--gray-800);
 }
 
 .booking-calendar-card .calendar-legend {
     border-top: none;
-    padding-top: 12px;
-    gap: 20px;
+    padding-top: 8px;
+    gap: 16px;
 }
 
 /* 이미 선택된 날짜 표시 */
@@ -406,29 +427,29 @@
 .time-select-card {
     background: var(--white);
     border-radius: var(--radius-xl);
-    padding: 20px 24px;
+    padding: 14px 16px;
     box-shadow: var(--shadow-md);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .time-select-card h3 {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--gray-800);
-    margin-bottom: 16px;
-    padding-bottom: 12px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--gray-100);
 }
 
 .time-slots {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    gap: 8px;
 }
 
 .time-slot {
     position: relative;
-    padding: 14px 10px;
+    padding: 10px 6px;
     text-align: center;
     border: 2px solid var(--gray-200);
     border-radius: var(--radius-lg);
@@ -450,9 +471,9 @@
 
 .time-value {
     display: block;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .time-slot.selected .time-value {
@@ -1003,7 +1024,7 @@
 /* ===== 푸터 ===== */
 .booking-footer {
     text-align: center;
-    padding: 30px 0;
+    padding: 16px 0;
     margin-top: auto;
 }
 
@@ -1016,11 +1037,52 @@
 /* ===== 반응형 ===== */
 @media (max-width: 480px) {
     .booking-app {
-        padding: 16px;
+        padding: 0 12px;
     }
 
+    /* ── 레이아웃 핵심 ── */
+    .booking-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .booking-footer {
+        padding: 6px 0;
+    }
+
+    .booking-footer p {
+        font-size: 11px;
+    }
+
+    /* ── 헤더 ── */
+    .booking-header {
+        padding: 12px 0 4px;
+    }
+
+    .booking-logo .logo {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .logo-text h1 {
+        font-size: 19px;
+    }
+
+    .logo-text p {
+        font-size: 12px;
+    }
+
+    .booking-header.compact {
+        padding: 8px 0 0;
+    }
+
+    /* ── 스텝 인디케이터 ── */
     .step-indicator {
-        gap: 4px;
+        padding: 8px 0 10px;
+        gap: 6px;
     }
 
     .step-number {
@@ -1035,17 +1097,206 @@
 
     .step-line {
         width: 20px;
+        margin-bottom: 18px;
+    }
+
+    /* ── Step 1: 과정 선택 ── */
+    .step-content h2 {
+        font-size: 19px;
+        margin-bottom: 3px;
+    }
+
+    .step-desc {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .course-select-card {
+        padding: 12px;
+        margin-bottom: 14px;
+        border-radius: 16px;
     }
 
     .course-options {
         grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 
+    .course-card {
+        padding: 30px 12px;
+        gap: 8px;
+        border-radius: 14px;
+    }
+
+    .course-name {
+        font-size: 18px;
+    }
+
+    .course-sessions {
+        font-size: 14px;
+    }
+
+    .next-btn {
+        padding: 16px;
+        font-size: 16px;
+        border-radius: 14px;
+    }
+
+    /* ── Step 2: 캘린더 ── */
     .time-slots {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
     }
 
+    .time-slot {
+        padding: 8px 4px;
+    }
+
+    .time-value {
+        font-size: 13px;
+    }
+
+    .time-duration {
+        font-size: 10px;
+    }
+
+    .booking-calendar-card {
+        padding: 12px;
+    }
+
+    .booking-calendar-card .calendar-nav {
+        margin-bottom: 8px;
+    }
+
+    .booking-calendar-card .calendar-grid {
+        margin-bottom: 8px;
+    }
+
+    .booking-calendar-card .weekday-header {
+        padding-bottom: 6px;
+        margin-bottom: 2px;
+    }
+
+    .booking-calendar-card .weekday-header span {
+        font-size: 12px;
+    }
+
+    .booking-calendar-card .calendar-days {
+        gap: 2px 0;
+    }
+
+    .booking-calendar-card .calendar-day {
+        padding: 3px 2px;
+        min-height: 44px;
+        font-size: 13px;
+    }
+
+    .booking-calendar-card .day-number {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+        margin-bottom: 1px;
+    }
+
+    .booking-calendar-card .day-status {
+        font-size: 8px;
+    }
+
+    .booking-calendar-card .calendar-legend {
+        gap: 12px;
+        padding-top: 6px;
+    }
+
+    .time-select-card {
+        padding: 12px;
+    }
+
+    .time-select-card h3 {
+        font-size: 13px;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+    }
+
+    .selected-schedules {
+        padding: 12px 14px;
+        margin-bottom: 10px;
+    }
+
+    .selected-schedules h3 {
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+
+    .schedule-tag {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+
+    .tag-number {
+        font-size: 11px;
+    }
+
+    .tag-info {
+        font-size: 13px;
+    }
+
+    .session-guide {
+        font-size: 12px;
+        padding: 4px 0 2px;
+    }
+
+    /* ── Step 4 ── */
     .account-value.price {
         font-size: 18px;
+    }
+}
+
+/* 매우 작은 화면 (360px 이하) */
+@media (max-width: 360px) {
+    .booking-app {
+        padding: 0 10px;
+    }
+
+    .step-indicator {
+        padding: 6px 0 8px;
+    }
+
+    .course-card {
+        padding: 24px 8px;
+    }
+
+    .course-name {
+        font-size: 16px;
+    }
+
+    .course-sessions {
+        font-size: 13px;
+    }
+
+    .booking-calendar-card {
+        padding: 10px;
+    }
+
+    .booking-calendar-card .day-number {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+    }
+
+    .booking-calendar-card .calendar-day {
+        min-height: 38px;
+        padding: 2px 1px;
+    }
+
+    .booking-calendar-card .weekday-header span {
+        font-size: 11px;
+    }
+
+    .time-slot {
+        padding: 7px 3px;
+    }
+
+    .time-value {
+        font-size: 12px;
     }
 }
