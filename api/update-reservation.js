@@ -104,6 +104,10 @@ module.exports = async function handler(req, res) {
       reservation.schedules = schedules;
       reservationList[idx] = reservation;
 
+    } else if (action === 'mark_email_sent') {
+      reservation.emailSent = true;
+      reservationList[idx] = reservation;
+
     } else {
       return res.status(400).json({ error: '잘못된 action입니다.' });
     }
