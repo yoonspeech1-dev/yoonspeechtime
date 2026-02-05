@@ -92,7 +92,9 @@ module.exports = async function handler(req, res) {
     `■ 직무: ${reservation.customerPosition || '-'}\n` +
     `■ 과정: ${reservation.courseName || '-'}\n` +
     `■ 금액: ${reservation.price ? Number(reservation.price).toLocaleString('ko-KR') + '원' : '-'}\n` +
-    `■ 현금영수증: ${receiptInfo}`;
+    `■ 현금영수증: ${receiptInfo}\n` +
+    `■ 경로: ${(reservation.referrals || []).join(', ') || '-'}\n` +
+    `■ 진행방식: ${reservation.consultMethod || '-'}`;
 
   try {
     results.staff = await messageService.sendOne({
