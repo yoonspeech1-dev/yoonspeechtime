@@ -168,7 +168,8 @@ function isDateAvailable(dateStr) {
     if (!blocks) return false;
 
     const values = Object.values(blocks);
-    return values.includes('available');
+    // available 또는 booked(기존 호환성)도 열린 상태로 취급
+    return values.includes('available') || values.includes('booked');
 }
 
 function isOperatingDay(dayOfWeek) {
@@ -291,6 +292,26 @@ function hasBookedTime(dateStr) {
     return Object.values(blocks).includes('booked');
 }
 
+// 확정된 예약에서 해당 날짜/시간에 예약이 있는지 확인 (자동잠김 시간 포함)
+function getBookedTimesFromReservations(dateStr) {
+    const bookedTimes = new Set();
+
+    state.reservations
+        .filter(r => r.status === 'confirmed')
+        .forEach(reservation => {
+            const schedules = reservation.schedules || reservation.dates || [];
+            schedules.forEach(({ date, time }) => {
+                if (date === dateStr) {
+                    // 예약 시간과 자동잠김 시간 (120분) 모두 포함
+                    const blockedSlots = getBlockedSlots(time);
+                    blockedSlots.forEach(slot => bookedTimes.add(slot));
+                }
+            });
+        });
+
+    return bookedTimes;
+}
+
 function updateDateSelectors(year, month) {
     const yearSelect = document.getElementById('yearSelect');
     const monthSelect = document.getElementById('monthSelect');
@@ -390,26 +411,41 @@ function renderTimeBlocks() {
 
     container.innerHTML = slots.map(time => {
         let status = 'unavailable'; // 기본값은 항상 잠금
+        let hasBooking = false; // 예약이 있는지 여부
 
         if (targetDates.length === 1) {
             const dateStr = targetDates[0];
-            if (state.timeBlocks[dateStr] && state.timeBlocks[dateStr][time]) {
-                status = state.timeBlocks[dateStr][time];
+            // 열림/닫힘 상태 확인 (booked 상태도 available/unavailable로 취급)
+            const blockStatus = state.timeBlocks[dateStr] && state.timeBlocks[dateStr][time];
+            if (blockStatus === 'available' || blockStatus === 'booked') {
+                status = 'available';
+            } else if (blockStatus === 'unavailable') {
+                status = 'unavailable';
             }
+
+            // 예약 여부는 실제 예약 데이터에서 확인
+            const bookedTimes = getBookedTimesFromReservations(dateStr);
+            hasBooking = bookedTimes.has(time);
         } else {
             // 다중 선택: 모든 날짜에서 같은 상태면 그 상태, 아니면 unavailable
             const statuses = targetDates.map(dateStr => {
-                if (state.timeBlocks[dateStr] && state.timeBlocks[dateStr][time]) {
-                    return state.timeBlocks[dateStr][time];
+                const blockStatus = state.timeBlocks[dateStr] && state.timeBlocks[dateStr][time];
+                if (blockStatus === 'available' || blockStatus === 'booked') {
+                    return 'available';
                 }
                 return 'unavailable';
             });
 
             const allSame = statuses.every(s => s === statuses[0]);
             if (allSame) status = statuses[0];
+
+            // 다중 선택 시에는 예약 표시 안함 (복잡해짐)
         }
 
-        return `<div class="time-block ${status}" data-time="${time}">${time}</div>`;
+        const bookingClass = hasBooking ? ' has-booking' : '';
+        const bookingLabel = hasBooking ? '<span class="booking-label">예약</span>' : '';
+
+        return `<div class="time-block ${status}${bookingClass}" data-time="${time}">${time}${bookingLabel}</div>`;
     }).join('');
 
     // 타임 블록 드래그 선택 이벤트
@@ -448,9 +484,6 @@ function renderTimeBlocks() {
 
 // ===== 드래그 선택 처리 =====
 function handleDragStart(time, block) {
-    // 예약 완료 상태는 드래그 불가
-    if (block.classList.contains('booked')) return;
-
     state.isDragging = true;
     state.dragStartTime = time;
     state.dragSelectedTimes = [time];
@@ -466,9 +499,6 @@ function handleDragStart(time, block) {
 
 function handleDragMove(time, block) {
     if (!state.isDragging) return;
-
-    // 예약 완료 상태는 건너뜀
-    if (block.classList.contains('booked')) return;
 
     // 이미 선택된 시간이면 건너뜀
     if (state.dragSelectedTimes.includes(time)) return;
@@ -489,17 +519,14 @@ function handleDragEnd() {
         return;
     }
 
-    // 선택된 시간들의 상태 변경
+    // 선택된 시간들의 상태 변경 (예약이 있어도 열림/닫힘 변경 가능)
     targetDates.forEach(dateStr => {
         if (!state.timeBlocks[dateStr]) {
             state.timeBlocks[dateStr] = {};
         }
 
         state.dragSelectedTimes.forEach(time => {
-            const currentStatus = state.timeBlocks[dateStr][time] || 'unavailable';
-            if (currentStatus !== 'booked') {
-                state.timeBlocks[dateStr][time] = state.dragMode;
-            }
+            state.timeBlocks[dateStr][time] = state.dragMode;
         });
     });
 
@@ -550,11 +577,9 @@ function handleTimeBlockClick(time) {
 
         const currentStatus = state.timeBlocks[dateStr][time] || 'unavailable';
 
-        // 예약 완료 상태는 변경 불가
-        if (currentStatus === 'booked') return;
-
-        // 상태 토글
-        state.timeBlocks[dateStr][time] = currentStatus === 'available' ? 'unavailable' : 'available';
+        // 상태 토글 (예약이 있어도 열림/닫힘 변경 가능)
+        const isAvailable = currentStatus === 'available' || currentStatus === 'booked';
+        state.timeBlocks[dateStr][time] = isAvailable ? 'unavailable' : 'available';
     });
 
     renderTimeBlocks();
@@ -581,9 +606,7 @@ function bulkOpenTimeBlocks() {
             state.timeBlocks[dateStr] = {};
         }
         slots.forEach(time => {
-            if (state.timeBlocks[dateStr][time] !== 'booked') {
-                state.timeBlocks[dateStr][time] = 'available';
-            }
+            state.timeBlocks[dateStr][time] = 'available';
         });
     });
 
@@ -610,9 +633,7 @@ function closeAllTimeBlocks() {
             state.timeBlocks[dateStr] = {};
         }
         slots.forEach(time => {
-            if (state.timeBlocks[dateStr][time] !== 'booked') {
-                state.timeBlocks[dateStr][time] = 'unavailable';
-            }
+            state.timeBlocks[dateStr][time] = 'unavailable';
         });
     });
 
@@ -639,9 +660,7 @@ function openAllTimeBlocks() {
             state.timeBlocks[dateStr] = {};
         }
         slots.forEach(time => {
-            if (state.timeBlocks[dateStr][time] !== 'booked') {
-                state.timeBlocks[dateStr][time] = 'available';
-            }
+            state.timeBlocks[dateStr][time] = 'available';
         });
     });
 
@@ -959,17 +978,8 @@ async function confirmReservation(reservationId) {
     if (reservation) {
         reservation.status = 'confirmed';
 
-        // 해당 타임 블록들을 예약 완료로 변경 (2시간 블록 적용) - 로컬 상태도 업데이트
-        const schedules = reservation.schedules || reservation.dates || [];
-        schedules.forEach(({ date, time }) => {
-            if (!state.timeBlocks[date]) {
-                state.timeBlocks[date] = {};
-            }
-            const blockedSlots = getBlockedSlots(time);
-            blockedSlots.forEach(slot => {
-                state.timeBlocks[date][slot] = 'booked';
-            });
-        });
+        // 예약 확정 시 타임블록은 available 상태로 유지
+        // 예약 표시는 예약 데이터에서 동적으로 렌더링됨
 
         await updateReservationOnServer('confirm', reservationId);
         renderReservations();
@@ -1216,20 +1226,7 @@ async function deleteReservation(reservationId) {
     const name = reservation.customerName || reservation.name || '';
     if (!confirm(`${name}님의 예약을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
 
-    // 해당 예약의 booked 슬롯을 available로 복원 (로컬 상태)
-    const schedules = reservation.schedules || reservation.dates || [];
-    schedules.forEach(({ date, time }) => {
-        if (state.timeBlocks[date]) {
-            const blockedSlots = getBlockedSlots(time);
-            blockedSlots.forEach(slot => {
-                if (state.timeBlocks[date][slot] === 'booked') {
-                    state.timeBlocks[date][slot] = 'available';
-                }
-            });
-        }
-    });
-
-    // reservations에서 제거
+    // reservations에서 제거 (예약 표시는 자동으로 사라짐)
     state.reservations = state.reservations.filter(r => r.id !== reservationId);
 
     await updateReservationOnServer('delete', reservationId);
@@ -1295,7 +1292,10 @@ function renderEditTimeOptions(dateStr, selectEl, currentTime, reservationId) {
         // 자기 자신의 예약 슬롯이면 선택 가능하게 표시
         const isOwnSlot = ownSchedules.some(s => s.date === dateStr && s.time === time);
 
-        if (blockStatus === 'available' || isOwnSlot) {
+        // available 또는 booked(기존 호환성)도 열린 상태로 취급
+        const isAvailable = blockStatus === 'available' || blockStatus === 'booked';
+
+        if (isAvailable || isOwnSlot) {
             const option = document.createElement('option');
             option.value = time;
             option.textContent = time;
@@ -1332,33 +1332,7 @@ async function saveEditedSchedules() {
         newSchedules.push({ date, time });
     }
 
-    // 기존 booked 슬롯 해제
-    const oldSchedules = reservation.schedules || reservation.dates || [];
-    oldSchedules.forEach(({ date, time }) => {
-        if (state.timeBlocks[date]) {
-            const blockedSlots = getBlockedSlots(time);
-            blockedSlots.forEach(slot => {
-                if (state.timeBlocks[date][slot] === 'booked') {
-                    state.timeBlocks[date][slot] = 'available';
-                }
-            });
-        }
-    });
-
-    // 새 일정으로 booked 설정 (confirmed 상태인 경우에만)
-    if (reservation.status === 'confirmed') {
-        newSchedules.forEach(({ date, time }) => {
-            if (!state.timeBlocks[date]) {
-                state.timeBlocks[date] = {};
-            }
-            const blockedSlots = getBlockedSlots(time);
-            blockedSlots.forEach(slot => {
-                state.timeBlocks[date][slot] = 'booked';
-            });
-        });
-    }
-
-    // schedules 업데이트
+    // schedules 업데이트 (예약 표시는 예약 데이터에서 자동으로 반영됨)
     reservation.schedules = newSchedules;
 
     await updateReservationOnServer('edit_schedules', reservationId, newSchedules);

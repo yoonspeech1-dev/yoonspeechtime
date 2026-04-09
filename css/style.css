@@ -756,20 +756,34 @@ body {
     background: var(--primary-light);
     border-color: var(--primary);
     color: var(--primary);
-    cursor: not-allowed;
     position: relative;
 }
 
-.time-block.booked::after {
-    content: '예약';
-    position: absolute;
-    top: 2px;
-    right: 4px;
+/* 예약이 있는 타임블록 (열림/닫힘 변경 가능) */
+.time-block.has-booking {
+    position: relative;
+}
+
+.time-block.has-booking .booking-label {
+    display: block;
     font-size: 9px;
     background: var(--primary);
     color: white;
-    padding: 1px 4px;
+    padding: 1px 5px;
     border-radius: 4px;
+    margin-top: 2px;
+}
+
+.time-block.available.has-booking {
+    background: var(--primary-light);
+}
+
+.time-block.unavailable.has-booking {
+    background: #f0f0f0;
+}
+
+.time-block.unavailable.has-booking .booking-label {
+    background: var(--gray-500);
 }
 
 /* 드래그 선택 중 스타일 */
