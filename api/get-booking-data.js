@@ -16,8 +16,17 @@ module.exports = async function handler(req, res) {
       redis.get('time_blocks'),
     ]);
 
+    // 기본 설정값
+    const defaultSettings = {
+      weekdays: [1, 2, 3, 4, 5],
+      startTime: '09:00',
+      endTime: '18:00',
+      interval: 60,
+      bookingLinkActive: false
+    };
+
     return res.status(200).json({
-      settings: settings || { weekdays: [1, 2, 3, 4, 5], startTime: '09:00', endTime: '18:00', interval: 60 },
+      settings: settings ? { ...defaultSettings, ...settings } : defaultSettings,
       timeBlocks: timeBlocks || {},
     });
   } catch (e) {

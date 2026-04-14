@@ -5,6 +5,140 @@
     min-height: 100vh;
 }
 
+/* ===== 예약 비활성화 안내 화면 ===== */
+.booking-closed-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.booking-closed-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 40px 32px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.closed-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.closed-logo .logo {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+}
+
+.closed-logo .logo-text h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 2px;
+}
+
+.closed-logo .logo-text p {
+    font-size: 14px;
+    color: var(--gray-500);
+}
+
+.closed-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.closed-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.closed-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.closed-contact {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.closed-contact strong {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.kakao-channel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 14px 28px;
+    background: #FEE500;
+    color: #3C1E1E;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.kakao-channel-btn:hover {
+    background: #F5DC00;
+    box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 480px) {
+    .booking-closed-card {
+        padding: 32px 24px;
+    }
+
+    .closed-logo .logo {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .closed-logo .logo-text h1 {
+        font-size: 20px;
+    }
+
+    .closed-icon {
+        font-size: 40px;
+    }
+
+    .closed-text {
+        font-size: 16px;
+    }
+
+    .closed-contact {
+        font-size: 13px;
+    }
+}
+
 .booking-app {
     max-width: 600px;
     margin: 0 auto;

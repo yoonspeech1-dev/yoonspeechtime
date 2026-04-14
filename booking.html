@@ -9,7 +9,28 @@
     <link rel="stylesheet" href="/css/booking.css">
 </head>
 <body class="booking-page">
-    <div class="booking-app">
+    <!-- 예약 비활성화 안내 화면 -->
+    <div class="booking-closed-overlay" id="bookingClosedOverlay" style="display: none;">
+        <div class="booking-closed-card">
+            <div class="closed-logo">
+                <span class="logo">Y</span>
+                <div class="logo-text">
+                    <h1>윤스피치</h1>
+                    <p>1:1 면접 컨설팅</p>
+                </div>
+            </div>
+            <div class="closed-message">
+                <div class="closed-icon">📅</div>
+                <p class="closed-text">현재 예약 마감 또는 예약 가능 기간이 아닙니다.</p>
+                <p class="closed-contact">예약 일정 관련 문의는 카카오채널 <strong>&lt;윤스피치&gt;</strong>로 문의주세요.</p>
+                <a href="https://pf.kakao.com/_xnxdxoxj" target="_blank" class="kakao-channel-btn">
+                    <span>💬</span> 카카오채널 문의하기
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="booking-app" id="bookingApp">
         <!-- 상단 레이아웃: 로고 / 스텝 / 안내문구 -->
         <div class="booking-top-area flex flex-col items-center justify-center gap-8" id="bookingHeader">
             <!-- 로고 -->

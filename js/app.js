@@ -18,7 +18,8 @@ const state = {
         weekdays: [1, 2, 3, 4, 5], // 월~금 (0=일, 6=토)
         startTime: '09:00',
         endTime: '18:00',
-        interval: 60
+        interval: 60,
+        bookingLinkActive: false // 예약 링크 활성화 상태
     },
     // 타임 블록 데이터: { 'YYYY-MM-DD': { '10:00': 'available' | 'unavailable' | 'booked' } }
     // 기본값은 빈 객체 (모두 잠금 상태)
@@ -160,6 +161,40 @@ function applySettingsToUI() {
     document.getElementById('startTime').value = state.settings.startTime;
     document.getElementById('endTime').value = state.settings.endTime;
     document.getElementById('interval').value = state.settings.interval;
+
+    // 예약 링크 활성화 상태 업데이트
+    updateBookingLinkToggleUI();
+}
+
+// ===== 예약 링크 토글 UI 업데이트 =====
+function updateBookingLinkToggleUI() {
+    const toggle = document.getElementById('bookingLinkActive');
+    const statusText = document.getElementById('linkStatusText');
+    const statusDesc = document.getElementById('linkStatusDesc');
+
+    if (toggle) {
+        toggle.checked = state.settings.bookingLinkActive;
+    }
+
+    if (statusText) {
+        if (state.settings.bookingLinkActive) {
+            statusText.textContent = '활성';
+            statusText.classList.add('active');
+        } else {
+            statusText.textContent = '비활성';
+            statusText.classList.remove('active');
+        }
+    }
+
+    if (statusDesc) {
+        if (state.settings.bookingLinkActive) {
+            statusDesc.textContent = '활성 상태: 고객이 예약 링크에서 정상적으로 예약할 수 있습니다.';
+            statusDesc.classList.add('active');
+        } else {
+            statusDesc.textContent = '비활성 상태: 고객이 예약 링크에 접속하면 안내 문구만 표시됩니다.';
+            statusDesc.classList.remove('active');
+        }
+    }
 }
 
 // ===== 날짜 예약 가능 여부 확인 =====
@@ -873,6 +908,14 @@ function setupEventListeners() {
     const nextMonth = new Date(today);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     document.getElementById('linkEndDate').value = formatDate(nextMonth);
+
+    // 예약 링크 활성화 토글
+    document.getElementById('bookingLinkActive').addEventListener('change', async (e) => {
+        state.settings.bookingLinkActive = e.target.checked;
+        updateBookingLinkToggleUI();
+        await saveSettingsToServer();
+        showToast(e.target.checked ? '예약 링크가 활성화되었습니다' : '예약 링크가 비활성화되었습니다');
+    });
 }
 
 // ===== 예약 목록 렌더링 =====

@@ -94,10 +94,26 @@ async function loadAdminData() {
         const data = await res.json();
         if (data.settings) bookingState.settings = data.settings;
         if (data.timeBlocks) bookingState.timeBlocks = data.timeBlocks;
+
+        // 예약 링크 활성화 여부 확인
+        if (!data.settings || !data.settings.bookingLinkActive) {
+            showBookingClosedOverlay();
+            return false;
+        }
+        return true;
     } catch (e) {
         console.error('데이터 로드 실패:', e);
         showToast('데이터를 불러오는데 실패했습니다');
+        return false;
     }
+}
+
+// 예약 비활성화 화면 표시
+function showBookingClosedOverlay() {
+    const overlay = document.getElementById('bookingClosedOverlay');
+    const bookingApp = document.getElementById('bookingApp');
+    if (overlay) overlay.style.display = 'flex';
+    if (bookingApp) bookingApp.style.display = 'none';
 }
 
 // 예약 시간 기준으로 블록해야 할 슬롯 목록 반환 (컨설팅 90분 + 준비 30분 = 120분)
@@ -819,7 +835,13 @@ async function init() {
     // 로딩 표시
     document.body.classList.add('loading');
 
-    await loadAdminData();
+    const isActive = await loadAdminData();
+
+    // 예약 링크가 비활성화된 경우 초기화 중단
+    if (!isActive) {
+        document.body.classList.remove('loading');
+        return;
+    }
 
     initStep1();
     initStep2();

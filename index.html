@@ -236,6 +236,26 @@
                         <button class="copy-btn" id="copyUrl">복사</button>
                     </div>
                 </div>
+
+                <!-- 예약 링크 활성화/비활성화 -->
+                <div class="link-card">
+                    <h2>예약 링크 상태</h2>
+                    <p class="description">예약 페이지의 활성화 상태를 관리합니다.</p>
+
+                    <div class="link-status-toggle">
+                        <div class="toggle-info">
+                            <span class="toggle-label">예약 링크 활성화</span>
+                            <span class="toggle-status" id="linkStatusText">비활성</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="bookingLinkActive">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p class="link-status-desc" id="linkStatusDesc">
+                        비활성 상태: 고객이 예약 링크에 접속하면 안내 문구만 표시됩니다.
+                    </p>
+                </div>
             </div>
         </section>
 
