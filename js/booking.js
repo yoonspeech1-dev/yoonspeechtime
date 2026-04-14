@@ -206,19 +206,34 @@ function initStep1() {
     const customSection = document.getElementById('customInputSection');
     const nextBtn = document.getElementById('toStep2Btn');
 
+    // 과정 선택 처리 함수
+    function handleCourseSelect(value) {
+        bookingState.selectedCourse = value;
+
+        if (value === 'custom') {
+            customSection.style.display = 'block';
+            bookingState.totalSessions = bookingState.customSessions;
+        } else {
+            customSection.style.display = 'none';
+            bookingState.totalSessions = COURSES[value].sessions;
+        }
+
+        nextBtn.disabled = false;
+    }
+
+    // change와 click 이벤트 모두 처리 (간헐적 이벤트 미발생 방지)
     courseRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
-            bookingState.selectedCourse = radio.value;
+        radio.addEventListener('change', () => handleCourseSelect(radio.value));
+    });
 
-            if (radio.value === 'custom') {
-                customSection.style.display = 'block';
-                bookingState.totalSessions = bookingState.customSessions;
-            } else {
-                customSection.style.display = 'none';
-                bookingState.totalSessions = COURSES[radio.value].sessions;
+    // 라벨(.course-option) 클릭 시에도 처리
+    document.querySelectorAll('.course-option').forEach(label => {
+        label.addEventListener('click', () => {
+            const radio = label.querySelector('input[name="course"]');
+            if (radio) {
+                radio.checked = true;
+                handleCourseSelect(radio.value);
             }
-
-            nextBtn.disabled = false;
         });
     });
 
