@@ -202,9 +202,8 @@ function isDateAvailable(dateStr) {
     const blocks = state.timeBlocks[dateStr];
     if (!blocks) return false;
 
-    const values = Object.values(blocks);
-    // available 또는 booked(기존 호환성)도 열린 상태로 취급
-    return values.includes('available') || values.includes('booked');
+    // available(열림) 상태인 슬롯이 있어야 예약 가능
+    return Object.values(blocks).includes('available');
 }
 
 function isOperatingDay(dayOfWeek) {
