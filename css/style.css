@@ -1767,21 +1767,23 @@ body {
 
 @media (max-width: 768px) {
     .app {
-        padding: 12px;
+        padding: 8px;
     }
 
     .main-tabs {
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
+        gap: 6px;
+        margin-bottom: 12px;
     }
 
     .main-tab {
-        padding: 12px 16px;
+        padding: 10px 12px;
         font-size: 13px;
     }
 
     .content-header {
         flex-wrap: wrap;
+        margin-bottom: 12px;
     }
 
     .service-tag {
@@ -1790,32 +1792,177 @@ body {
         margin-top: 8px;
     }
 
-    .calendar-card,
+    /* 캘린더 카드 컴팩트화 */
+    .calendar-card {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    .calendar-nav {
+        margin-bottom: 12px;
+    }
+
+    .calendar-grid {
+        margin-bottom: 8px;
+    }
+
+    .weekday-header {
+        padding-bottom: 6px;
+        margin-bottom: 4px;
+    }
+
+    .weekday-header span {
+        font-size: 12px;
+    }
+
+    .calendar-days {
+        gap: 2px;
+    }
+
+    .calendar-day {
+        padding: 4px 2px;
+        min-height: 52px;
+    }
+
+    .day-number {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .day-status {
+        font-size: 9px;
+    }
+
+    .calendar-legend {
+        padding: 8px 0;
+        gap: 12px;
+        font-size: 11px;
+    }
+
+    .calendar-footer {
+        padding-top: 8px;
+    }
+
+    .calendar-footer .selected-info {
+        font-size: 13px;
+    }
+
+    .today-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    /* 시간 관리 카드 컴팩트화 */
     .time-card {
-        padding: 16px;
+        padding: 12px;
     }
 
     .time-header {
         flex-direction: column;
         align-items: flex-start;
+        margin-bottom: 12px;
+        gap: 8px;
+    }
+
+    .time-header h2 {
+        font-size: 15px;
+    }
+
+    .selected-date-label {
+        font-size: 13px;
     }
 
     .header-actions {
         margin-left: 0;
         width: 100%;
+        gap: 6px;
+    }
+
+    .status-btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .time-options {
+        margin-bottom: 10px;
+    }
+
+    .time-options .checkbox-option {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .time-settings {
+        gap: 10px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
     }
 
     .setting-row {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .setting-row > label {
+        font-size: 13px;
+    }
+
+    .setting-item {
+        gap: 4px;
+    }
+
+    .setting-item label {
+        font-size: 12px;
+    }
+
+    .setting-item input,
+    .setting-item select {
+        padding: 6px 8px;
+        font-size: 13px;
+        width: 75px;
     }
 
     .duration-buttons {
         flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .duration-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .apply-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    /* 타임 블록 컴팩트화 */
+    .time-blocks-container {
+        margin-bottom: 12px;
     }
 
     .time-blocks {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+    }
+
+    .time-block {
+        padding: 10px 4px;
+        font-size: 13px;
+    }
+
+    .legend {
+        padding-top: 10px;
+        gap: 12px;
+    }
+
+    .legend-item {
+        font-size: 11px;
     }
 
     .reservation-header {
@@ -1862,31 +2009,150 @@ body {
 }
 
 @media (max-width: 480px) {
+    .app {
+        padding: 6px;
+    }
+
+    .header {
+        padding: 8px 0;
+        margin-bottom: 8px;
+    }
+
     .header h1 {
-        font-size: 18px;
+        font-size: 16px;
+    }
+
+    .logo {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
     }
 
     .main-tabs {
         grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+
+    .main-tab {
+        padding: 8px 10px;
+        font-size: 12px;
     }
 
     .tab-icon {
         display: none;
     }
 
-    .calendar-nav {
-        flex-wrap: wrap;
-        gap: 8px;
+    /* 캘린더 더 컴팩트하게 */
+    .calendar-card {
+        padding: 10px;
     }
 
-    .date-selectors {
-        order: -1;
-        width: 100%;
-        justify-content: center;
+    .calendar-nav {
+        margin-bottom: 8px;
+    }
+
+    .nav-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .date-select {
+        padding: 6px 8px;
+        font-size: 13px;
+        padding-right: 24px;
+    }
+
+    .calendar-day {
+        padding: 2px 1px;
+        min-height: 44px;
+    }
+
+    .day-number {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .day-status {
+        font-size: 8px;
+    }
+
+    .calendar-legend {
+        padding: 6px 0;
+        gap: 8px;
+        font-size: 10px;
+    }
+
+    .calendar-footer {
+        padding-top: 6px;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+
+    /* 시간 관리 더 컴팩트하게 */
+    .time-card {
+        padding: 10px;
+    }
+
+    .time-header h2 {
+        font-size: 14px;
+    }
+
+    .time-options .checkbox-option {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .time-settings {
+        gap: 8px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+
+    .setting-item input,
+    .setting-item select {
+        padding: 5px 6px;
+        font-size: 12px;
+        width: 68px;
+    }
+
+    .duration-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    .apply-btn {
+        padding: 5px 10px;
+        font-size: 11px;
     }
 
     .time-blocks {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+    }
+
+    .time-block {
+        padding: 8px 2px;
+        font-size: 12px;
+    }
+
+    .time-block .booking-label {
+        font-size: 8px;
+        padding: 1px 4px;
+    }
+
+    .legend {
+        padding-top: 8px;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .legend-item {
+        font-size: 10px;
     }
 
     .weekday-buttons {
