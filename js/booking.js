@@ -628,10 +628,25 @@ function initStep3() {
     document.getElementById('bookingForm').addEventListener('submit', handleSubmit);
 }
 
+// 중복 제출 방지 플래그
+let isSubmitting = false;
+
 async function handleSubmit(e) {
     e.preventDefault();
 
+    // 중복 제출 방지
+    if (isSubmitting) {
+        return;
+    }
+
     const form = e.target;
+    const submitBtn = form.querySelector('.submit-btn');
+
+    // 버튼 비활성화 및 로딩 상태 표시
+    isSubmitting = true;
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = '처리 중...';
     const name = form.customerName.value.trim();
     const age = form.customerAge.value.trim();
     const phone = form.customerPhone.value.trim();
@@ -673,45 +688,60 @@ async function handleSubmit(e) {
     // 개인정보 동의
     const privacyAgree = form.privacyAgree ? form.privacyAgree.value : '';
 
+    // 버튼 복원 함수
+    function resetSubmitButton() {
+        isSubmitting = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    }
+
     // 유효성 검사
     if (!name || !age || !phone || !email || !region || !company || !position || !interviewDate) {
         showToast('필수 항목을 모두 입력해주세요');
+        resetSubmitButton();
         return;
     }
 
     const phoneRegex = /^01[0-9]{1}[0-9]{3,4}[0-9]{4}$/;
     if (!phoneRegex.test(phone.replace(/-/g, ''))) {
         showToast('올바른 전화번호를 입력해주세요');
+        resetSubmitButton();
         return;
     }
 
     if (receiptType === 'yes' && !receiptNumber) {
         showToast('현금영수증 발급 번호를 입력해주세요');
+        resetSubmitButton();
         return;
     }
 
     if (interviewTypes.length === 0) {
         showToast('면접 진행 해당 절차를 선택해주세요');
+        resetSubmitButton();
         return;
     }
 
     if (!consultMethod) {
         showToast('컨설팅 진행 희망 방식을 선택해주세요');
+        resetSubmitButton();
         return;
     }
 
     if (referrals.length === 0) {
         showToast('윤쌤을 알게 된 경로를 선택해주세요');
+        resetSubmitButton();
         return;
     }
 
     if (!refundAgree) {
         showToast('환불정책에 동의해주세요');
+        resetSubmitButton();
         return;
     }
 
     if (!privacyAgree) {
         showToast('개인정보 이용 동의를 선택해주세요');
+        resetSubmitButton();
         return;
     }
 
@@ -751,6 +781,7 @@ async function handleSubmit(e) {
     try {
         await saveReservation(reservation);
     } catch (e) {
+        resetSubmitButton();
         return; // 저장 실패 시 중단
     }
 
