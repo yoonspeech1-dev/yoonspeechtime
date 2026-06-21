@@ -1,5 +1,8 @@
 // ===== 윤스피치 고객 예약 페이지 =====
 
+// 구글 스프레드시트 웹앱 URL (Apps Script 배포 후 여기에 URL 입력)
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxyTgRVH5XxbLuVjxT22H0O0G9R9zYrvRpeSqfuMn5bgwpnz5oNAijqR9O2wPJteeOG6w/exec';
+
 // 과정 정보 (금액은 과정 선택 화면에 표시하지 않음)
 const COURSES = {
     allcare: { name: '올케어', sessions: 3, price: 950000 },
@@ -631,6 +634,49 @@ function initStep3() {
 // 중복 제출 방지 플래그
 let isSubmitting = false;
 
+// 구글 스프레드시트로 데이터 전송
+async function sendToGoogleSheet(reservation) {
+    if (!GOOGLE_SHEET_URL) {
+        console.log('구글 스프레드시트 URL이 설정되지 않았습니다.');
+        return;
+    }
+
+    try {
+        const scheduleText = reservation.schedules
+            .map((s, i) => `${i + 1}회차: ${s.date} ${s.time}`)
+            .join(' / ');
+
+        await fetch(GOOGLE_SHEET_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                createdAt: reservation.createdAt,
+                id: reservation.id,
+                courseName: reservation.courseName,
+                price: reservation.price,
+                schedules: scheduleText,
+                customerName: reservation.customerName,
+                customerAge: reservation.customerAge,
+                customerPhone: reservation.customerPhone,
+                customerEmail: reservation.customerEmail,
+                customerRegion: reservation.customerRegion,
+                customerCompany: reservation.customerCompany,
+                customerPosition: reservation.customerPosition,
+                customerInterviewDate: reservation.customerInterviewDate,
+                interviewTypes: reservation.interviewTypes.join(', '),
+                consultMethod: reservation.consultMethod,
+                referrals: reservation.referrals.join(', '),
+                receiptNumber: reservation.receiptNumber || '미신청',
+                privacyAgree: reservation.privacyAgree
+            })
+        });
+        console.log('구글 스프레드시트 전송 완료');
+    } catch (e) {
+        console.error('구글 스프레드시트 전송 실패:', e);
+    }
+}
+
 async function handleSubmit(e) {
     e.preventDefault();
 
@@ -795,6 +841,9 @@ async function handleSubmit(e) {
     } catch (e) {
         console.error('관리자 알림 전송 실패:', e);
     }
+
+    // 구글 스프레드시트로 데이터 전송 (실패해도 예약 진행에 영향 없음)
+    sendToGoogleSheet(reservation);
 
     // Step 4로 이동
     showStep4(reservation);
