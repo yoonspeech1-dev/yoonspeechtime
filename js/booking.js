@@ -160,16 +160,45 @@ function isOperatingDay(dayOfWeek) {
 function isDateAvailable(dateStr) {
     const blocks = bookingState.timeBlocks[dateStr];
     if (!blocks) return false;
-    return Object.values(blocks).includes('available');
+    // zoom, offline, both, available(레거시) 중 하나라도 있으면 예약 가능
+    const availableStatuses = ['zoom', 'offline', 'both', 'available'];
+    return Object.values(blocks).some(status => availableStatuses.includes(status));
 }
 
 function getAvailableTimeSlots(dateStr) {
     const blocks = bookingState.timeBlocks[dateStr];
     if (!blocks) return [];
+    const availableStatuses = ['zoom', 'offline', 'both', 'available'];
     return Object.entries(blocks)
-        .filter(([_, status]) => status === 'available')
-        .map(([time]) => time)
-        .sort();
+        .filter(([_, status]) => availableStatuses.includes(status))
+        .map(([time, status]) => ({
+            time,
+            type: status === 'available' ? 'both' : status // 레거시 'available'은 'both'로 취급
+        }))
+        .sort((a, b) => a.time.localeCompare(b.time));
+}
+
+function getSlotType(dateStr, time) {
+    const blocks = bookingState.timeBlocks[dateStr];
+    if (!blocks || !blocks[time]) return null;
+    const status = blocks[time];
+    if (status === 'available') return 'both';
+    if (['zoom', 'offline', 'both'].includes(status)) return status;
+    return null;
+}
+
+function getTypeLabel(type) {
+    if (type === 'zoom') return '🎥 Zoom';
+    if (type === 'offline') return '🏢 대면';
+    if (type === 'both') return '🎥🏢 선택가능';
+    return '';
+}
+
+function getTypeClass(type) {
+    if (type === 'zoom') return 'type-zoom';
+    if (type === 'offline') return 'type-offline';
+    if (type === 'both') return 'type-both';
+    return '';
 }
 
 // 이미 선택된 일정인지 확인
@@ -436,17 +465,28 @@ function renderTimeSlots(dateStr) {
         ? `<div class="session-guide">${nextSession}회차 시간을 선택해주세요</div>`
         : '';
 
-    container.innerHTML = sessionGuide + availableSlots.map(time => {
+    container.innerHTML = sessionGuide + availableSlots.map(slot => {
+        const { time, type } = slot;
         const selected = isTimeSelected(dateStr, time);
         const blocked = !selected && (isTimeBlockedBySelection(dateStr, time) || (dateHasSelection && !selected));
         const sessionNum = selected ? getSessionNumberForSlot(dateStr, time) : null;
         const blockedLabel = !selected && dateHasSelection ? '하루 1타임' : (blocked ? '선택 불가' : '');
+        const selectedSchedule = bookingState.selectedSchedules.find(s => s.date === dateStr && s.time === time);
+        const selectedType = selectedSchedule ? selectedSchedule.type : null;
+
+        // 타입 표시
+        const typeLabel = getTypeLabel(type);
+        const typeClass = getTypeClass(type);
+
         return `
-            <div class="time-slot ${selected ? 'selected' : ''} ${blocked ? 'blocked' : ''}" data-date="${dateStr}" data-time="${time}">
+            <div class="time-slot ${selected ? 'selected' : ''} ${blocked ? 'blocked' : ''} ${typeClass}"
+                 data-date="${dateStr}" data-time="${time}" data-type="${type}">
                 ${selected && sessionNum ? `<span class="time-session-badge">${sessionNum}회차</span>` : ''}
+                <span class="time-type-badge">${typeLabel}</span>
                 <span class="time-value">${time}</span>
                 <span class="time-duration">90분</span>
                 ${selected ? '<span class="time-check">✓</span>' : ''}
+                ${selected && selectedType ? `<span class="selected-type-label">${selectedType === 'zoom' ? '🎥 Zoom' : '🏢 대면'}</span>` : ''}
                 ${blocked ? `<span class="time-blocked-label">${blockedLabel}</span>` : ''}
             </div>
         `;
@@ -454,12 +494,19 @@ function renderTimeSlots(dateStr) {
 
     container.querySelectorAll('.time-slot:not(.blocked)').forEach(slot => {
         slot.addEventListener('click', () => {
-            toggleTimeSlot(slot.dataset.date, slot.dataset.time);
+            const type = slot.dataset.type;
+            if (type === 'both') {
+                // 둘 다 가능한 경우 선택 모달 표시
+                showTypeSelectModal(slot.dataset.date, slot.dataset.time);
+            } else {
+                // Zoom 또는 대면만 가능한 경우 바로 선택
+                toggleTimeSlot(slot.dataset.date, slot.dataset.time, type);
+            }
         });
     });
 }
 
-function toggleTimeSlot(date, time) {
+function toggleTimeSlot(date, time, type = null) {
     const idx = bookingState.selectedSchedules.findIndex(s => s.date === date && s.time === time);
 
     if (idx > -1) {
@@ -471,7 +518,7 @@ function toggleTimeSlot(date, time) {
             showToast(`최대 ${bookingState.totalSessions}개까지 선택할 수 있습니다`);
             return;
         }
-        bookingState.selectedSchedules.push({ date, time });
+        bookingState.selectedSchedules.push({ date, time, type });
     }
 
     // UI 업데이트
@@ -488,6 +535,61 @@ function toggleTimeSlot(date, time) {
         const nextSession = bookingState.selectedSchedules.length + 1;
         showToast(`다음 ${nextSession}회차 날짜 및 시간을 캘린더에서 선택해주세요`);
     }
+}
+
+// Zoom/대면 선택 모달
+function showTypeSelectModal(date, time) {
+    // 이미 선택된 시간인지 확인
+    const idx = bookingState.selectedSchedules.findIndex(s => s.date === date && s.time === time);
+    if (idx > -1) {
+        // 이미 선택된 경우 제거
+        toggleTimeSlot(date, time);
+        return;
+    }
+
+    // 모달 생성
+    const modal = document.createElement('div');
+    modal.className = 'type-select-modal';
+    modal.innerHTML = `
+        <div class="type-select-overlay"></div>
+        <div class="type-select-content">
+            <h3>진행 방식을 선택해주세요</h3>
+            <p class="type-select-time">${formatDateKorean(date)} ${time}</p>
+            <div class="type-select-buttons">
+                <button class="type-select-btn zoom" data-type="zoom">
+                    <span class="type-icon">🎥</span>
+                    <span class="type-name">Zoom</span>
+                    <span class="type-desc">온라인 화상 컨설팅</span>
+                </button>
+                <button class="type-select-btn offline" data-type="offline">
+                    <span class="type-icon">🏢</span>
+                    <span class="type-name">대면</span>
+                    <span class="type-desc">오프라인 방문 컨설팅</span>
+                </button>
+            </div>
+            <button class="type-select-cancel">취소</button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // 이벤트 핸들러
+    modal.querySelector('.type-select-overlay').addEventListener('click', () => {
+        modal.remove();
+    });
+
+    modal.querySelector('.type-select-cancel').addEventListener('click', () => {
+        modal.remove();
+    });
+
+    modal.querySelectorAll('.type-select-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const selectedType = btn.dataset.type;
+            modal.remove();
+            toggleTimeSlot(date, time, selectedType);
+            showToast(`${selectedType === 'zoom' ? 'Zoom' : '대면'} 컨설팅으로 선택되었습니다`);
+        });
+    });
 }
 
 function updateSelectedSchedulesUI() {
@@ -517,6 +619,7 @@ function updateSelectedSchedulesUI() {
             <div class="schedule-tag">
                 <span class="tag-number">${i + 1}회차</span>
                 <span class="tag-info">${formatDateKorean(s.date)} ${s.time}</span>
+                ${s.type ? `<span class="tag-type ${s.type}">${s.type === 'zoom' ? '🎥' : '🏢'}</span>` : ''}
                 <button class="tag-remove" data-date="${s.date}" data-time="${s.time}">×</button>
             </div>
         `).join('');
@@ -581,6 +684,7 @@ function renderStep3() {
                 <div class="schedule-summary-row">
                     <span class="schedule-num">${i + 1}회차</span>
                     <span class="schedule-datetime">${formatDateKorean(s.date)} ${s.time}</span>
+                    ${s.type ? `<span class="schedule-type ${s.type}">${s.type === 'zoom' ? '🎥 Zoom' : '🏢 대면'}</span>` : ''}
                 </div>
             `).join('')}
         </div>
@@ -643,7 +747,10 @@ async function sendToGoogleSheet(reservation) {
 
     try {
         const scheduleText = reservation.schedules
-            .map((s, i) => `${i + 1}회차: ${s.date} ${s.time}`)
+            .map((s, i) => {
+                const typeLabel = s.type === 'zoom' ? 'Zoom' : s.type === 'offline' ? '대면' : '';
+                return `${i + 1}회차: ${s.date} ${s.time}${typeLabel ? ` (${typeLabel})` : ''}`;
+            })
             .join(' / ');
 
         await fetch(GOOGLE_SHEET_URL, {
@@ -860,7 +967,7 @@ function showStep4(reservation) {
     schedulesContainer.innerHTML = reservation.schedules.map((s, i) => `
         <div class="summary-item">
             <span class="summary-label">${i + 1}회차</span>
-            <span class="summary-value">${formatDateKorean(s.date)} ${s.time}</span>
+            <span class="summary-value">${formatDateKorean(s.date)} ${s.time} ${s.type ? (s.type === 'zoom' ? '🎥' : '🏢') : ''}</span>
         </div>
     `).join('');
 

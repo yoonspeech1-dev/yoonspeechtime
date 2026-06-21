@@ -682,6 +682,193 @@
     margin-bottom: 4px;
 }
 
+/* 타입별 시간 슬롯 스타일 */
+.time-type-badge {
+    display: block;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+.time-slot.type-zoom {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+}
+
+.time-slot.type-zoom:hover {
+    background: #DBEAFE;
+}
+
+.time-slot.type-offline {
+    border-color: #10B981;
+    background: #ECFDF5;
+}
+
+.time-slot.type-offline:hover {
+    background: #D1FAE5;
+}
+
+.time-slot.type-both {
+    border-color: #8B5CF6;
+    background: linear-gradient(135deg, #EFF6FF 50%, #ECFDF5 50%);
+}
+
+.time-slot.type-both:hover {
+    background: linear-gradient(135deg, #DBEAFE 50%, #D1FAE5 50%);
+}
+
+.time-slot.selected.type-zoom {
+    background: #3B82F6;
+    border-color: #2563EB;
+}
+
+.time-slot.selected.type-offline {
+    background: #10B981;
+    border-color: #059669;
+}
+
+.time-slot.selected.type-both {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.selected-type-label {
+    display: block;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-top: 2px;
+}
+
+/* 선택된 일정 태그의 타입 표시 */
+.tag-type {
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+/* Zoom/대면 선택 모달 */
+.type-select-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.type-select-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.type-select-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 340px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    animation: modalFadeIn 0.2s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.type-select-content h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--gray-900);
+}
+
+.type-select-time {
+    font-size: 14px;
+    color: var(--gray-500);
+    margin-bottom: 20px;
+}
+
+.type-select-buttons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.type-select-btn {
+    flex: 1;
+    padding: 16px 12px;
+    border-radius: 12px;
+    border: 2px solid var(--gray-200);
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.type-select-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.type-select-btn.zoom:hover {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+}
+
+.type-select-btn.offline:hover {
+    border-color: #10B981;
+    background: #ECFDF5;
+}
+
+.type-select-btn .type-icon {
+    font-size: 28px;
+}
+
+.type-select-btn .type-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+.type-select-btn .type-desc {
+    font-size: 11px;
+    color: var(--gray-500);
+}
+
+.type-select-cancel {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.type-select-cancel:hover {
+    background: var(--gray-200);
+}
+
 .time-session-badge {
     display: inline-block;
     font-size: 10px;
@@ -753,6 +940,24 @@
     font-size: 14px;
     font-weight: 500;
     color: var(--gray-700);
+}
+
+.schedule-type {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-left: auto;
+}
+
+.schedule-type.zoom {
+    background: #EFF6FF;
+    color: #1D4ED8;
+}
+
+.schedule-type.offline {
+    background: #ECFDF5;
+    color: #047857;
 }
 
 /* 예약 폼 */

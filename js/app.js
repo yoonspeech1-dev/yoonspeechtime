@@ -202,8 +202,9 @@ function isDateAvailable(dateStr) {
     const blocks = state.timeBlocks[dateStr];
     if (!blocks) return false;
 
-    // available(열림) 상태인 슬롯이 있어야 예약 가능
-    return Object.values(blocks).includes('available');
+    // zoom, offline, both, available(레거시) 중 하나라도 있으면 예약 가능
+    const availableStatuses = ['zoom', 'offline', 'both', 'available'];
+    return Object.values(blocks).some(status => availableStatuses.includes(status));
 }
 
 function isOperatingDay(dayOfWeek) {
@@ -378,7 +379,9 @@ function getDateDots(dateStr) {
     const dots = [];
     const values = Object.values(blocks);
 
-    if (values.includes('available')) dots.push('available');
+    // zoom, offline, both, available(레거시) 중 하나라도 있으면 available 표시
+    const hasAvailable = values.some(v => ['zoom', 'offline', 'both', 'available'].includes(v));
+    if (hasAvailable) dots.push('available');
     if (values.includes('booked')) dots.push('booked');
 
     return dots.slice(0, 3); // 최대 3개
@@ -420,6 +423,19 @@ function updateSelectedDateText() {
     }
 }
 
+// ===== 타임 블록 상태 헬퍼 함수 =====
+function getBlockStatus(dateStr, time) {
+    const blockStatus = state.timeBlocks[dateStr] && state.timeBlocks[dateStr][time];
+    // 기존 'available' 값은 'both'로 취급 (하위 호환성)
+    if (blockStatus === 'available') return 'both';
+    if (blockStatus === 'zoom' || blockStatus === 'offline' || blockStatus === 'both') return blockStatus;
+    return 'unavailable';
+}
+
+function isAvailableStatus(status) {
+    return status === 'zoom' || status === 'offline' || status === 'both';
+}
+
 // ===== 타임 블록 렌더링 =====
 function renderTimeBlocks() {
     const container = document.getElementById('timeBlocks');
@@ -442,52 +458,82 @@ function renderTimeBlocks() {
 
     // 단일 날짜 또는 다중 날짜 처리
     const targetDates = state.multiSelectMode ? state.selectedDates : [state.selectedDate];
+    const isSingleDate = targetDates.length === 1;
 
     container.innerHTML = slots.map(time => {
         let status = 'unavailable'; // 기본값은 항상 잠금
         let hasBooking = false; // 예약이 있는지 여부
+        let zoomChecked = false;
+        let offlineChecked = false;
 
-        if (targetDates.length === 1) {
+        if (isSingleDate) {
             const dateStr = targetDates[0];
-            // 열림/닫힘 상태 확인 (booked 상태도 available/unavailable로 취급)
-            const blockStatus = state.timeBlocks[dateStr] && state.timeBlocks[dateStr][time];
-            if (blockStatus === 'available' || blockStatus === 'booked') {
-                status = 'available';
-            } else if (blockStatus === 'unavailable') {
-                status = 'unavailable';
-            }
+            status = getBlockStatus(dateStr, time);
+
+            // Zoom/대면 체크 상태
+            zoomChecked = status === 'zoom' || status === 'both';
+            offlineChecked = status === 'offline' || status === 'both';
 
             // 예약 여부는 실제 예약 데이터에서 확인
             const bookedTimes = getBookedTimesFromReservations(dateStr);
             hasBooking = bookedTimes.has(time);
         } else {
             // 다중 선택: 모든 날짜에서 같은 상태면 그 상태, 아니면 unavailable
-            const statuses = targetDates.map(dateStr => {
-                const blockStatus = state.timeBlocks[dateStr] && state.timeBlocks[dateStr][time];
-                if (blockStatus === 'available' || blockStatus === 'booked') {
-                    return 'available';
-                }
-                return 'unavailable';
-            });
-
+            const statuses = targetDates.map(dateStr => getBlockStatus(dateStr, time));
             const allSame = statuses.every(s => s === statuses[0]);
-            if (allSame) status = statuses[0];
-
-            // 다중 선택 시에는 예약 표시 안함 (복잡해짐)
+            if (allSame) {
+                status = statuses[0];
+                zoomChecked = status === 'zoom' || status === 'both';
+                offlineChecked = status === 'offline' || status === 'both';
+            }
         }
 
         const bookingClass = hasBooking ? ' has-booking' : '';
         const bookingLabel = hasBooking ? '<span class="booking-label">예약</span>' : '';
 
-        return `<div class="time-block ${status}${bookingClass}" data-time="${time}">${time}${bookingLabel}</div>`;
+        // 상태에 따른 CSS 클래스
+        const statusClass = isAvailableStatus(status) ? status : 'unavailable';
+
+        // 토글 버튼 HTML
+        const toggleButtons = `
+            <div class="type-toggles">
+                <button class="type-toggle zoom ${zoomChecked ? 'active' : ''}" data-type="zoom" title="Zoom">
+                    <span class="toggle-icon">🎥</span>
+                </button>
+                <button class="type-toggle offline ${offlineChecked ? 'active' : ''}" data-type="offline" title="대면">
+                    <span class="toggle-icon">🏢</span>
+                </button>
+            </div>
+        `;
+
+        return `
+            <div class="time-block ${statusClass}${bookingClass}" data-time="${time}">
+                <span class="time-label">${time}</span>
+                ${bookingLabel}
+                ${toggleButtons}
+            </div>
+        `;
     }).join('');
 
-    // 타임 블록 드래그 선택 이벤트
+    // 토글 버튼 이벤트
+    container.querySelectorAll('.type-toggle').forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const block = toggle.closest('.time-block');
+            const time = block.dataset.time;
+            const type = toggle.dataset.type; // 'zoom' or 'offline'
+
+            toggleTimeType(time, type);
+        });
+    });
+
+    // 타임 블록 드래그 선택 이벤트 (시간 라벨 영역에서만)
     container.querySelectorAll('.time-block').forEach(block => {
         const time = block.dataset.time;
 
-        // 마우스 이벤트
+        // 마우스 이벤트 - 토글 버튼 영역 제외
         block.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.type-toggle')) return;
             e.preventDefault();
             handleDragStart(time, block);
         });
@@ -500,6 +546,7 @@ function renderTimeBlocks() {
 
         // 터치 이벤트 (모바일)
         block.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.type-toggle')) return;
             e.preventDefault();
             handleDragStart(time, block);
         }, { passive: false });
@@ -516,6 +563,48 @@ function renderTimeBlocks() {
     });
 }
 
+// ===== Zoom/대면 토글 처리 =====
+function toggleTimeType(time, type) {
+    const targetDates = state.multiSelectMode ? state.selectedDates : [state.selectedDate];
+
+    targetDates.forEach(dateStr => {
+        if (!state.timeBlocks[dateStr]) {
+            state.timeBlocks[dateStr] = {};
+        }
+
+        const currentStatus = getBlockStatus(dateStr, time);
+        let newStatus = 'unavailable';
+
+        if (type === 'zoom') {
+            if (currentStatus === 'zoom') {
+                newStatus = 'unavailable'; // zoom 해제
+            } else if (currentStatus === 'offline') {
+                newStatus = 'both'; // offline + zoom = both
+            } else if (currentStatus === 'both') {
+                newStatus = 'offline'; // both에서 zoom 해제 = offline
+            } else {
+                newStatus = 'zoom'; // unavailable에서 zoom 추가
+            }
+        } else if (type === 'offline') {
+            if (currentStatus === 'offline') {
+                newStatus = 'unavailable'; // offline 해제
+            } else if (currentStatus === 'zoom') {
+                newStatus = 'both'; // zoom + offline = both
+            } else if (currentStatus === 'both') {
+                newStatus = 'zoom'; // both에서 offline 해제 = zoom
+            } else {
+                newStatus = 'offline'; // unavailable에서 offline 추가
+            }
+        }
+
+        state.timeBlocks[dateStr][time] = newStatus;
+    });
+
+    renderTimeBlocks();
+    renderCalendar();
+    saveTimeBlocksToServer();
+}
+
 // ===== 드래그 선택 처리 =====
 function handleDragStart(time, block) {
     state.isDragging = true;
@@ -523,8 +612,11 @@ function handleDragStart(time, block) {
     state.dragSelectedTimes = [time];
 
     // 드래그 모드 결정: 현재 상태의 반대로 설정
-    const currentStatus = block.classList.contains('available') ? 'available' : 'unavailable';
-    state.dragMode = currentStatus === 'available' ? 'unavailable' : 'available';
+    // zoom, offline, both는 모두 available 상태로 취급
+    const isCurrentlyAvailable = block.classList.contains('zoom') ||
+                                  block.classList.contains('offline') ||
+                                  block.classList.contains('both');
+    state.dragMode = isCurrentlyAvailable ? 'unavailable' : 'both';
 
     // 시각적 표시
     block.classList.add('drag-selected');
@@ -565,7 +657,7 @@ function handleDragEnd() {
     });
 
     const count = state.dragSelectedTimes.length;
-    const action = state.dragMode === 'available' ? '열림' : '닫힘';
+    const action = state.dragMode === 'unavailable' ? '닫힘' : '열림(Zoom+대면)';
 
     resetDragState();
     renderTimeBlocks();
@@ -609,11 +701,11 @@ function handleTimeBlockClick(time) {
             state.timeBlocks[dateStr] = {};
         }
 
-        const currentStatus = state.timeBlocks[dateStr][time] || 'unavailable';
+        const currentStatus = getBlockStatus(dateStr, time);
 
         // 상태 토글 (예약이 있어도 열림/닫힘 변경 가능)
-        const isAvailable = currentStatus === 'available' || currentStatus === 'booked';
-        state.timeBlocks[dateStr][time] = isAvailable ? 'unavailable' : 'available';
+        const isAvailable = isAvailableStatus(currentStatus);
+        state.timeBlocks[dateStr][time] = isAvailable ? 'unavailable' : 'both';
     });
 
     renderTimeBlocks();
@@ -640,14 +732,14 @@ function bulkOpenTimeBlocks() {
             state.timeBlocks[dateStr] = {};
         }
         slots.forEach(time => {
-            state.timeBlocks[dateStr][time] = 'available';
+            state.timeBlocks[dateStr][time] = 'both'; // Zoom+대면 모두 가능
         });
     });
 
     renderTimeBlocks();
     renderCalendar();
     saveTimeBlocksToServer();
-    showToast(`${targetDates.length}개 날짜에 시간이 열렸습니다`);
+    showToast(`${targetDates.length}개 날짜에 시간이 열렸습니다 (Zoom+대면)`);
 }
 
 function closeAllTimeBlocks() {
@@ -694,14 +786,14 @@ function openAllTimeBlocks() {
             state.timeBlocks[dateStr] = {};
         }
         slots.forEach(time => {
-            state.timeBlocks[dateStr][time] = 'available';
+            state.timeBlocks[dateStr][time] = 'both'; // Zoom+대면 모두 가능
         });
     });
 
     renderTimeBlocks();
     renderCalendar();
     saveTimeBlocksToServer();
-    showToast('마감 해제되었습니다');
+    showToast('마감 해제되었습니다 (Zoom+대면)');
 }
 
 // ===== 설정 저장 =====

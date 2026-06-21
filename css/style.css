@@ -742,6 +742,36 @@ body {
     background: var(--primary-light);
 }
 
+.time-block.zoom {
+    background: #EFF6FF;
+    border-color: #3B82F6;
+    color: #1D4ED8;
+}
+
+.time-block.zoom:hover {
+    background: #DBEAFE;
+}
+
+.time-block.offline {
+    background: #ECFDF5;
+    border-color: #10B981;
+    color: #047857;
+}
+
+.time-block.offline:hover {
+    background: #D1FAE5;
+}
+
+.time-block.both {
+    background: linear-gradient(135deg, #EFF6FF 50%, #ECFDF5 50%);
+    border-color: #8B5CF6;
+    color: #6D28D9;
+}
+
+.time-block.both:hover {
+    background: linear-gradient(135deg, #DBEAFE 50%, #D1FAE5 50%);
+}
+
 .time-block.unavailable {
     background: var(--gray-100);
     border-color: var(--gray-200);
@@ -803,6 +833,62 @@ body {
 .time-block {
     user-select: none;
     -webkit-user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.time-block .time-label {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Zoom/대면 토글 버튼 */
+.type-toggles {
+    display: flex;
+    gap: 4px;
+}
+
+.type-toggle {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 2px solid var(--gray-300);
+    background: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.type-toggle .toggle-icon {
+    font-size: 14px;
+    opacity: 0.4;
+}
+
+.type-toggle:hover {
+    border-color: var(--gray-400);
+}
+
+.type-toggle.zoom.active {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+}
+
+.type-toggle.zoom.active .toggle-icon {
+    opacity: 1;
+}
+
+.type-toggle.offline.active {
+    border-color: #10B981;
+    background: #ECFDF5;
+}
+
+.type-toggle.offline.active .toggle-icon {
+    opacity: 1;
 }
 
 .empty-state {
@@ -838,6 +924,18 @@ body {
 .legend-dot.available {
     border: 2px solid var(--primary);
     background: var(--white);
+}
+
+.legend-dot.zoom {
+    background: #3B82F6;
+}
+
+.legend-dot.offline {
+    background: #10B981;
+}
+
+.legend-dot.both {
+    background: linear-gradient(135deg, #3B82F6 50%, #10B981 50%);
 }
 
 .legend-dot.unavailable {
