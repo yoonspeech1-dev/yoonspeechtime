@@ -486,7 +486,6 @@ function renderTimeSlots(dateStr) {
                 <span class="time-value">${time}</span>
                 <span class="time-duration">90분</span>
                 ${selected ? '<span class="time-check">✓</span>' : ''}
-                ${selected && selectedType ? `<span class="selected-type-label">${selectedType === 'zoom' ? '🎥 Zoom' : '🏢 대면'}</span>` : ''}
                 ${blocked ? `<span class="time-blocked-label">${blockedLabel}</span>` : ''}
             </div>
         `;
