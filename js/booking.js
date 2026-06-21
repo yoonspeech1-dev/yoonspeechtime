@@ -558,7 +558,7 @@ function showTypeSelectModal(date, time) {
                 <button class="type-select-btn zoom" data-type="zoom">
                     <span class="type-icon">🎥</span>
                     <span class="type-name">Zoom</span>
-                    <span class="type-desc">온라인 화상 컨설팅</span>
+                    <span class="type-desc">온라인 컨설팅</span>
                 </button>
                 <button class="type-select-btn offline" data-type="offline">
                     <span class="type-icon">🏢</span>
