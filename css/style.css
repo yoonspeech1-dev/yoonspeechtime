@@ -1143,6 +1143,22 @@ body {
     background: #dc2626;
 }
 
+.calendar-btn {
+    padding: 8px 20px;
+    background: #8B5CF6;
+    border: none;
+    border-radius: var(--radius);
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.calendar-btn:hover {
+    background: #7C3AED;
+}
+
 /* ===== Link Settings ===== */
 .link-card .description {
     font-size: 14px;

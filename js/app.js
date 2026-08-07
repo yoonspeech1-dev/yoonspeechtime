@@ -1075,6 +1075,7 @@ function renderReservations(filter = 'all', searchTerm = '') {
                     ${reservation.status === 'pending' ? `
                         <button class="confirm-btn" onclick="event.stopPropagation(); confirmReservation('${reservation.id}')">예약 확정</button>
                     ` : ''}
+                    <button class="calendar-btn" onclick="event.stopPropagation(); registerToGoogleCalendar('${reservation.id}')">일정등록</button>
                     <button class="email-btn${reservation.emailSent ? ' email-sent' : ''}" data-reservation-id="${reservation.id}" onclick="event.stopPropagation(); sendConfirmationEmail('${reservation.id}')" ${reservation.emailSent ? 'disabled' : ''}>${reservation.emailSent ? '발송 완료' : '메일발송'}</button>
                 </div>
             </div>
@@ -1225,6 +1226,45 @@ async function sendConfirmationEmail(reservationId) {
 
 window.confirmReservation = confirmReservation;
 window.sendConfirmationEmail = sendConfirmationEmail;
+
+// ===== 구글 캘린더 등록 (Gemini 프롬프트 생성) =====
+function registerToGoogleCalendar(reservationId) {
+    const reservation = state.reservations.find(r => r.id === reservationId);
+    if (!reservation) return;
+
+    const name = reservation.customerName || reservation.name || '-';
+    const position = reservation.customerPosition || '-';
+    const company = reservation.customerCompany || '-';
+    const courseName = reservation.courseName || reservation.course || '-';
+    const schedules = reservation.schedules || reservation.dates || [];
+
+    // 프롬프트 생성
+    let prompt = '';
+    schedules.forEach((s, i) => {
+        const date = new Date(s.date + 'T00:00:00');
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const dateStr = `${year}년 ${month}월 ${day}일 ${s.time}`;
+
+        prompt += `${name}/${position}/${company} ${courseName}-${i + 1}\n`;
+        prompt += `${dateStr}\n`;
+    });
+    prompt += '위 일정등록해줘';
+
+    // 클립보드에 복사
+    navigator.clipboard.writeText(prompt).then(() => {
+        showToast('프롬프트가 복사되었습니다. Gemini에서 붙여넣기 하세요.');
+        // Gemini 새 탭으로 열기
+        window.open('https://gemini.google.com/app', '_blank');
+    }).catch(err => {
+        console.error('클립보드 복사 실패:', err);
+        // 폴백: 수동 복사를 위해 프롬프트 표시
+        alert('클립보드 복사에 실패했습니다.\n아래 프롬프트를 수동으로 복사해주세요:\n\n' + prompt);
+    });
+}
+
+window.registerToGoogleCalendar = registerToGoogleCalendar;
 
 // ===== 예약 상세보기 =====
 function showReservationDetail(reservationId) {
